@@ -35,6 +35,7 @@ export const dictionary: Readonly<Record<string, string>> = {
   Latest: '最新',
   'Privacy Policy': '隐私政策',
   'No ads & more': '无广告及更多权益',
+  'Type or paste': '输入或粘贴',
 
   // 卡牌详情页
   Wiki: '维基',

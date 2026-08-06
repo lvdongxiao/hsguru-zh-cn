@@ -18,6 +18,10 @@ test('translates an exact dictionary entry', () => {
   assert.equal(translateText('Home', dictionary), '首页');
 });
 
+test('translates the homepage input placeholder', () => {
+  assert.equal(translateText('Type or paste', siteDictionary), '输入或粘贴');
+});
+
 test('preserves surrounding whitespace', () => {
   assert.equal(translateText('  Loading\n', dictionary), '  加载中\n');
 });
