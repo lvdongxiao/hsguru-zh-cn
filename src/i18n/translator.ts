@@ -170,6 +170,14 @@ function translateDynamicText(
   return undefined;
 }
 
+function replacePreservingWhitespace(
+  source: string,
+  replacement: string,
+): string {
+  const match = source.match(/^(\s*)(.*?)(\s*)$/s);
+  return match ? `${match[1]}${replacement}${match[3]}` : replacement;
+}
+
 export function translateText(
   source: string,
   dictionary: TranslationDictionary,
@@ -177,12 +185,12 @@ export function translateText(
   const match = source.match(/^(\s*)(.*?)(\s*)$/s);
   if (!match) return source;
 
-  const [, leadingWhitespace, content, trailingWhitespace] = match;
+  const content = match[2];
   const translated =
     dictionary[content] ?? translateDynamicText(content, dictionary);
   return translated === undefined
     ? source
-    : `${leadingWhitespace}${translated}${trailingWhitespace}`;
+    : replacePreservingWhitespace(source, translated);
 }
 
 export function translateCardTextByHref(
@@ -196,8 +204,7 @@ export function translateCardTextByHref(
   const localizedName = dbfId ? namesByDbfId[dbfId] : undefined;
   if (!localizedName) return source;
 
-  const match = source.match(/^(\s*)(.*?)(\s*)$/s);
-  return match ? `${match[1]}${localizedName}${match[3]}` : localizedName;
+  return replacePreservingWhitespace(source, localizedName);
 }
 
 export function translateCardDetailTextByHref(
@@ -220,8 +227,7 @@ export function translateCardDetailTextByHref(
     : undefined;
   if (!localized) return source;
 
-  const match = source.match(/^(\s*)(.*?)(\s*)$/s);
-  return match ? `${match[1]}${localized}${match[3]}` : localized;
+  return replacePreservingWhitespace(source, localized);
 }
 
 export function translateCardKeywords(
@@ -370,7 +376,13 @@ export class PageTranslator {
   }
 
   #translateElementAttributes(element: Element): void {
-    if (ignoredElementNames.has(element.tagName)) return;
+    // textarea 的正文不应改写，但 placeholder 等界面属性仍需翻译。
+    if (
+      ignoredElementNames.has(element.tagName) &&
+      element.tagName !== 'TEXTAREA'
+    ) {
+      return;
+    }
 
     for (const attribute of translatableAttributes) {
       const value = element.getAttribute(attribute);

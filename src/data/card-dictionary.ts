@@ -61,7 +61,9 @@ export function buildCardDictionary(
 ): Record<string, string> {
   const chineseNames = new Map(
     chineseCards
-      .filter((card): card is Required<LocalizedCard> => Boolean(card.name))
+      .filter((card): card is LocalizedCard & { name: string } =>
+        Boolean(card.name),
+      )
       .map((card) => [card.id, card.name]),
   );
 
@@ -259,10 +261,4 @@ export async function loadCardLocalization(
     }
     throw error;
   }
-}
-
-export async function loadCardDictionary(
-  forceRefresh = false,
-): Promise<Record<string, string>> {
-  return (await loadCardLocalization(forceRefresh)).dictionary;
 }

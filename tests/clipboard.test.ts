@@ -47,6 +47,19 @@ test('translates the compact text copied by the HSGuru deck button', () => {
   );
 });
 
+test('translates deckviewer ClipboardJS text for a dynamically added deck', () => {
+  const deckviewerText = [
+    '### Clone Mech Paladin',
+    'AAEBAZ8FBJ+3A/mkBMekBp3dBw2l9QKHrgOStQTUvQTa0wSEpQXZ0AW5/gXi8Qa/+Qa6lgfa4gea/AcAAQTX/gKd3QfzswbHpAb2swbHpAbu3gbHpAYAAA==',
+    '### You can view this deck at https://www.hsguru.com/deckviewer',
+  ].join('\n');
+
+  assert.equal(
+    translateCopiedDeckText(deckviewerText).split('\n')[0],
+    '### 复制机械骑',
+  );
+});
+
 test('creates the exact translated text written by the intercepted copy button', () => {
   assert.equal(
     createHsguruDeckCopyText(

@@ -41,6 +41,14 @@ function translatePage(): void {
   localizeCardImages(document.documentElement, cardRenderIdsByDbfId);
 }
 
+function replaceRecord(
+  target: Record<string, string>,
+  source: Readonly<Record<string, string>>,
+): void {
+  for (const key of Object.keys(target)) delete target[key];
+  Object.assign(target, source);
+}
+
 function toggleTranslation(): void {
   isEnabled = !isEnabled;
   localStorage.setItem(storageKey, String(isEnabled));
@@ -125,22 +133,10 @@ async function updateCardTranslations(forceRefresh = false): Promise<void> {
     // 卡牌名称可能与界面文案同名（例如 Brawl）。界面词典最后合并，
     // 确保模式和筛选选项不会被同名卡牌译名覆盖。
     Object.assign(runtimeDictionary, cardLocalization.dictionary, dictionary);
-    for (const dbfId of Object.keys(cardNamesByDbfId)) {
-      delete cardNamesByDbfId[dbfId];
-    }
-    Object.assign(cardNamesByDbfId, cardLocalization.namesByDbfId);
-    for (const dbfId of Object.keys(cardTextsByDbfId)) {
-      delete cardTextsByDbfId[dbfId];
-    }
-    Object.assign(cardTextsByDbfId, cardLocalization.textsByDbfId);
-    for (const dbfId of Object.keys(cardFlavorsByDbfId)) {
-      delete cardFlavorsByDbfId[dbfId];
-    }
-    Object.assign(cardFlavorsByDbfId, cardLocalization.flavorsByDbfId);
-    for (const keyword of Object.keys(cardKeywordDictionary)) {
-      delete cardKeywordDictionary[keyword];
-    }
-    Object.assign(cardKeywordDictionary, cardLocalization.keywordDictionary);
+    replaceRecord(cardNamesByDbfId, cardLocalization.namesByDbfId);
+    replaceRecord(cardTextsByDbfId, cardLocalization.textsByDbfId);
+    replaceRecord(cardFlavorsByDbfId, cardLocalization.flavorsByDbfId);
+    replaceRecord(cardKeywordDictionary, cardLocalization.keywordDictionary);
     cardRenderIdsByDbfId = cardLocalization.renderIdsByDbfId;
     translatePage();
     if (forceRefresh) {

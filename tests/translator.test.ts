@@ -283,6 +283,31 @@ test('translates the deck builder start page', () => {
   );
 });
 
+test('translates deck viewer controls', () => {
+  const expected: Readonly<Record<string, string>> = {
+    Add: '添加',
+    'Copy Deck': '复制套牌',
+    'Copy Deck Code': '复制套牌代码',
+    'Copy to clipboard': '复制到剪贴板',
+    'Copied!': '已复制！',
+    'Copy Link': '复制链接',
+    'Show Rotation': '显示轮换',
+    'Stop Comparing': '停止比较',
+    'Class Sort': '按职业排序',
+    Clear: '清除',
+    Remove: '移除',
+    'Compare to': '对比',
+    'Compare Decks': '比较套牌',
+    Rotation: '轮换',
+    'Copy deck code': '复制套牌代码',
+    'Deck code copied!': '套牌代码已复制！',
+  };
+
+  for (const [english, chinese] of Object.entries(expected)) {
+    assert.equal(translateText(english, siteDictionary), chinese);
+  }
+});
+
 test('translates deck detail page controls and statistics', () => {
   const expected: Readonly<Record<string, string>> = {
     Edit: '编辑',

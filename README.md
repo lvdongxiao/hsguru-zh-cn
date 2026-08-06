@@ -1,64 +1,118 @@
 # HSGuru 中文助手
 
-为 [HSGuru](https://www.hsguru.com/) 提供简体中文界面的 Tampermonkey 用户脚本。
+为 [HSGuru](https://www.hsguru.com/) 提供简体中文界面、中文卡牌数据和中文卡图的 Tampermonkey 用户脚本。
 
-## 当前状态
+## 功能
 
-项目已完成基础工程初始化，包含：
+- 翻译 HSGuru 的导航、按钮、筛选器、下拉菜单、表格和动态加载内容；
+- 覆盖套牌、环境、对局优劣、主播套牌、套牌构筑器、套牌查看器、套牌详情、卡牌详情和卡牌数据等页面；
+- 翻译 HSGuru 套牌名称，并保留 `XL` 等约定俗成的英文标记；
+- 从 HearthstoneJSON 加载完整的简体中文卡牌名称、卡牌文本、趣味描述、关键词和附属卡牌数据；
+- 将卡牌详情图、套牌悬停预览图等替换为简体中文卡图；
+- 翻译复制到剪贴板的套牌名称，包括动态添加到套牌查看器中的套牌；
+- 通过 MutationObserver 自动处理滚动加载、翻页、弹出菜单以及站点局部更新产生的新内容；
+- 提供“切换为中文/英文”和“更新卡牌翻译数据”两个 Tampermonkey 菜单命令。
 
-- TypeScript 源码和可扩展的界面词典；
-- 对所有页面、动态内容及隐藏下拉菜单的自动翻译；
-- 文本、`title`、`placeholder` 和 `aria-label` 翻译；
-- 从 HearthstoneJSON 自动加载完整的中英文可收藏卡牌名称并缓存 7 天；
-- 使用流派、机制和职业词根组合翻译 HSGuru 卡组名称；
-- Tampermonkey 菜单中的翻译开关；
-- 构建、类型检查、格式检查和单元测试；
-- GitHub Actions 持续集成与标签发布流程。
+脚本采用精确匹配和受控动态规则，不会直接替换长文本中的单个英文单词，以减少卡牌名称与界面文案同名时产生的误译。
 
-首轮词典覆盖 HSGuru 主导航、套牌筛选器、卡牌筛选器、职业、卡牌类型、
-随从类型、法术派系、稀有度、阵营以及当前卡牌系列。新卡牌名称不需要手工
-写入仓库，会在浏览器中自动同步。
+## 安装
 
-## 本地开发
+### 使用构建文件
 
-要求 Node.js 22 或更高版本。
+1. 下载或在本地构建 `dist/hsguru-zh-cn.user.js`；
+2. 使用 Tampermonkey 打开该文件并确认安装；
+3. 访问 HSGuru，然后刷新页面。
+
+如果本地文件有更新，请重新打开生成的 `.user.js` 文件，并在 Tampermonkey 中确认更新。
+
+### 本地构建
+
+需要 Node.js 22 或更高版本。
 
 ```bash
 npm install
-npm run dev
+npm run build
 ```
 
-开发模式会持续生成 `dist/hsguru-zh-cn.user.js`。在 Tampermonkey 中安装该文件，页面刷新后即可验证。
+生成文件位于：
 
-常用命令：
+```text
+dist/hsguru-zh-cn.user.js
+```
+
+## 使用
+
+安装后默认启用中文翻译。Tampermonkey 脚本菜单始终按以下顺序显示：
+
+1. `切换为英文` 或 `切换为中文`；
+2. `更新卡牌翻译数据`。
+
+切换为英文时，脚本会恢复已记录的英文文本和原始卡图。手动更新卡牌数据时，页面右上角会显示更新结果；如果请求失败但存在旧缓存，脚本会继续使用缓存数据。
+
+## 卡牌数据和缓存
+
+卡牌本地化数据来自 [HearthstoneJSON](https://hearthstonejson.com/)。脚本运行时会请求：
+
+- 英文可收藏卡牌数据，用于建立英文名称到中文名称的对应关系；
+- 简体中文完整卡牌数据，用于补充附属卡牌、卡牌文本、趣味描述和关键词；
+- 简体中文卡牌渲染图，用于替换页面中的英文卡图和悬停预览图。
+
+处理后的数据保存在 Tampermonkey 本地存储中，缓存有效期为 7 天。正常访问会优先使用有效缓存；也可以从脚本菜单强制更新。切换语言不会清除缓存。
+
+如果 HearthstoneJSON 暂时不可用，脚本不会硬编码卡牌文本或趣味描述；存在旧缓存时使用旧缓存，否则保持 HSGuru 原文。
+
+## 开发
 
 ```bash
-npm run build       # 生成用户脚本
-npm test            # 运行单元测试
-npm run typecheck   # TypeScript 类型检查
-npm run check       # 执行全部校验并构建
+npm run dev          # 监听源码并持续构建
+npm run build        # 生成用户脚本
+npm test             # 运行单元测试
+npm run typecheck    # TypeScript 类型检查
+npm run format       # 格式化项目文件
+npm run check        # 类型、格式、测试和构建的完整检查
+```
+
+主要目录：
+
+```text
+src/
+├── data/             # HearthstoneJSON 加载、配对和缓存
+├── i18n/             # 界面词典、套牌名称和 DOM 翻译器
+├── card-images.ts    # 中文卡图及悬停预览图
+├── clipboard.ts      # 套牌复制与中文名称处理
+└── index.ts          # 菜单、页面观察和运行时入口
+tests/                # Node.js 单元测试
+scripts/build.mjs     # esbuild 用户脚本构建
 ```
 
 ## 添加翻译
 
-在 `src/i18n/dictionary.ts` 中增加“英文原文 → 简体中文”词条。翻译器使用
-精确匹配，并为 `Min 200`、`Past 6 Hours`、`VS Death Knight` 等动态筛选文案
-提供受控格式规则，不会直接替换长文本中的某个单词，以减少误译。
+稳定的站点文案维护在 `src/i18n/dictionary.ts` 中，格式为“英文原文 → 简体中文”。
 
-卡牌数据来自 HearthstoneJSON 的 `latest` 中英文可收藏卡表，通过卡牌 ID 配对。
-首次访问需要下载约 6.5 MB 原始 JSON，生成的约 8,000 条名称映射会存入
-Tampermonkey 存储并缓存 7 天。也可从 Tampermonkey 菜单手动选择
-“更新卡牌翻译数据”。
+带数字或时间的文案，例如 `Min 200`、`Past 6 Hours` 和 `VS Death Knight`，由 `src/i18n/translator.ts` 中的受控格式规则处理。套牌名称词根维护在 `src/i18n/deck-names.ts` 中。炉石官方已有的卡牌名称、文本、趣味描述和关键词应来自 HearthstoneJSON，不应写入硬编码兜底翻译。
+
+修改后运行：
+
+```bash
+npm run check
+```
 
 ## GitHub 发布
 
-1. 在 GitHub 创建仓库，并将它设置为本地仓库的 `origin`；
+1. 将 GitHub 仓库设置为本地仓库的 `origin`；
 2. 提交并推送 `main` 分支；
-3. 推送形如 `v0.1.0` 的标签；
-4. Release 工作流会构建脚本、创建 GitHub Release 并上传 `.user.js` 文件。
+3. 推送形如 `v1.0.0` 的标签；
+4. Release 工作流会执行完整检查、创建 GitHub Release，并上传 `hsguru-zh-cn.user.js`。
 
-在 GitHub Actions 中构建时，脚本会自动写入当前仓库对应的 `downloadURL` 和 `updateURL`，方便 Tampermonkey 检查更新。
+GitHub Actions 构建时会根据当前仓库自动写入 `downloadURL` 和 `updateURL`，供 Tampermonkey 检查更新。
+
+## 数据来源和声明
+
+- 卡牌数据及渲染图由 [HearthstoneJSON](https://hearthstonejson.com/) 提供；
+- HSGuru、HearthstoneJSON、Hearthstone 及相关名称、商标和卡牌素材归各自权利人所有；
+- 本项目是非官方社区用户脚本，与 HSGuru、HearthSim 或 Blizzard Entertainment 无隶属或认可关系；
+- 本仓库不打包卡牌数据库或卡图，相关资源由脚本在浏览器中按需加载。
 
 ## 许可证
 
-[MIT](LICENSE)
+项目代码采用 [MIT License](LICENSE)。第三方数据、商标和素材不包含在该代码许可证的授权范围内。

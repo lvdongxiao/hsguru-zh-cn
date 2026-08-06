@@ -37,8 +37,8 @@ function extractDeckCode(heading: Element): string | undefined {
   return matches?.sort((a, b) => b.length - a.length)[0];
 }
 
-function findDeckHeading(button: HTMLButtonElement): Element | undefined {
-  let ancestor = button.parentElement;
+function findDeckHeading(trigger: HTMLElement): Element | undefined {
+  let ancestor = trigger.parentElement;
   while (ancestor && ancestor !== document.body) {
     const headings = [...ancestor.querySelectorAll('h2')].filter((heading) =>
       Boolean(extractDeckCode(heading)),
@@ -48,15 +48,15 @@ function findDeckHeading(button: HTMLButtonElement): Element | undefined {
     ancestor = ancestor.parentElement;
   }
 
-  const buttonRect = button.getBoundingClientRect();
+  const triggerRect = trigger.getBoundingClientRect();
   return [...document.querySelectorAll('main h2')]
     .filter((heading) => Boolean(extractDeckCode(heading)))
     .sort((a, b) => {
       const distanceA = Math.abs(
-        a.getBoundingClientRect().top - buttonRect.top,
+        a.getBoundingClientRect().top - triggerRect.top,
       );
       const distanceB = Math.abs(
-        b.getBoundingClientRect().top - buttonRect.top,
+        b.getBoundingClientRect().top - triggerRect.top,
       );
       return distanceA - distanceB;
     })[0];
@@ -71,7 +71,7 @@ function getDeckUrl(heading: Element): string | undefined {
   return `${candidate.origin}${candidate.pathname}`;
 }
 
-function showCopiedFeedback(button: HTMLButtonElement): void {
+function showCopiedFeedback(button: HTMLElement): void {
   document.querySelector('[data-hsguru-zh-copy-feedback]')?.remove();
 
   const originalLabel =
@@ -160,6 +160,26 @@ export function installDeckCopyButtonTranslation(
     'click',
     (event) => {
       if (!isEnabled() || !(event.target instanceof Element)) return;
+
+      // 牌组查看器动态添加的套牌使用 ClipboardJS，并把完整套牌文本
+      // 放在 data-clipboard-text 中。它不会调用 navigator.clipboard，
+      // 因此要在 ClipboardJS 响应点击前直接接管。
+      const clipboardTrigger = event.target.closest<HTMLElement>(
+        '[data-clipboard-text]',
+      );
+      const clipboardText = clipboardTrigger?.getAttribute(
+        'data-clipboard-text',
+      );
+      if (clipboardTrigger && clipboardText) {
+        const translated = translateCopiedDeckText(clipboardText);
+        if (translated !== clipboardText) {
+          event.preventDefault();
+          event.stopImmediatePropagation();
+          setClipboard(translated);
+          showCopiedFeedback(clipboardTrigger);
+          return;
+        }
+      }
 
       const button = event.target.closest<HTMLButtonElement>('button');
       if (!button) return;
