@@ -40,7 +40,7 @@ jobs:
 
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git fetch origin greasyfork
+          git fetch origin greasyfork:refs/remotes/origin/greasyfork
           git switch --force-create greasyfork origin/greasyfork
           cp "$artifact" hsguru-zh-cn.user.js
           git add hsguru-zh-cn.user.js
