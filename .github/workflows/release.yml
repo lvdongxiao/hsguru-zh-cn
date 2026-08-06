@@ -20,7 +20,35 @@ jobs:
       - run: npm run check
         env:
           GITHUB_REPOSITORY: ${{ github.repository }}
-      - name: Create GitHub Release and upload userscript
-        run: gh release create "$GITHUB_REF_NAME" dist/hsguru-zh-cn.user.js --generate-notes
+      - name: Create or update GitHub Release
+        run: |
+          if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
+            gh release upload "$GITHUB_REF_NAME" dist/hsguru-zh-cn.user.js --clobber
+          else
+            gh release create "$GITHUB_REF_NAME" dist/hsguru-zh-cn.user.js --generate-notes
+          fi
         env:
           GH_TOKEN: ${{ github.token }}
+      - name: Publish Greasy Fork sync file
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+
+          artifact="$RUNNER_TEMP/hsguru-zh-cn.user.js"
+          cp dist/hsguru-zh-cn.user.js "$artifact"
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git fetch origin greasyfork
+          git switch --force-create greasyfork origin/greasyfork
+          cp "$artifact" hsguru-zh-cn.user.js
+          git add hsguru-zh-cn.user.js
+
+          if git diff --cached --quiet; then
+            echo "Greasy Fork sync file is already up to date."
+            exit 0
+          fi
+
+          git commit -m "build: publish ${RELEASE_TAG}"
+          git push origin greasyfork
