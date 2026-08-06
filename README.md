@@ -2,6 +2,9 @@
 
 为 [HSGuru](https://www.hsguru.com/) 提供简体中文界面、中文卡牌数据和中文卡图的 Tampermonkey 用户脚本。
 
+[![CI](https://github.com/lvdongxiao/hsguru-zh-cn/actions/workflows/ci.yml/badge.svg)](https://github.com/lvdongxiao/hsguru-zh-cn/actions/workflows/ci.yml)
+[![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+
 ## 功能
 
 - 翻译 HSGuru 的导航、按钮、筛选器、下拉菜单、表格和动态加载内容；
@@ -17,13 +20,15 @@
 
 ## 安装
 
-### 使用构建文件
+### 从 GitHub Release 安装
 
-1. 下载或在本地构建 `dist/hsguru-zh-cn.user.js`；
-2. 使用 Tampermonkey 打开该文件并确认安装；
-3. 访问 HSGuru，然后刷新页面。
+1. 安装 [Tampermonkey](https://www.tampermonkey.net/)；
+2. 从 [Releases](https://github.com/lvdongxiao/hsguru-zh-cn/releases) 下载最新版 `hsguru-zh-cn.user.js`；
+3. 使用 Tampermonkey 打开脚本并确认安装；
+4. 访问 HSGuru，然后刷新页面。
 
-如果本地文件有更新，请重新打开生成的 `.user.js` 文件，并在 Tampermonkey 中确认更新。
+Release 构建会写入更新地址。安装 Release 中的脚本后，Tampermonkey 可以检查后续版本。
+如果 Releases 页面暂时没有可下载文件，请按下方步骤在本地构建。
 
 ### 本地构建
 
@@ -99,20 +104,25 @@ npm run check
 
 ## GitHub 发布
 
-1. 将 GitHub 仓库设置为本地仓库的 `origin`；
-2. 提交并推送 `main` 分支；
-3. 推送形如 `v1.0.0` 的标签；
-4. Release 工作流会执行完整检查、创建 GitHub Release，并上传 `hsguru-zh-cn.user.js`。
+本项目通过版本标签触发自动发布。确认 `package.json` 中的版本号和标签一致后执行：
+
+```bash
+git tag v1.0.0
+git push origin v1.0.0
+```
+
+Release 工作流会执行完整检查、创建 GitHub Release，并上传 `hsguru-zh-cn.user.js`。
 
 GitHub Actions 构建时会根据当前仓库自动写入 `downloadURL` 和 `updateURL`，供 Tampermonkey 检查更新。
 
 ## 数据来源和声明
 
-- 卡牌数据及渲染图由 [HearthstoneJSON](https://hearthstonejson.com/) 提供；
+- 卡牌数据及渲染图通过 [HearthstoneJSON](https://hearthstonejson.com/) 获取；
+- 早期部分界面文案和套牌名称翻译参考了 Greasy Fork 上的 [HSGuru 中文美化脚本](https://greasyfork.org/zh-CN/scripts/555065-hsguru-%E4%B8%AD%E6%96%87%E7%BE%8E%E5%8C%96%E8%84%9A%E6%9C%AC)（脚本署名：深海之鱼）；
 - HSGuru、HearthstoneJSON、Hearthstone 及相关名称、商标和卡牌素材归各自权利人所有；
 - 本项目是非官方社区用户脚本，与 HSGuru、HearthSim 或 Blizzard Entertainment 无隶属或认可关系；
 - 本仓库不打包卡牌数据库或卡图，相关资源由脚本在浏览器中按需加载。
 
 ## 许可证
 
-项目代码采用 [MIT License](LICENSE)。第三方数据、商标和素材不包含在该代码许可证的授权范围内。
+本项目贡献者原创的代码采用 [MIT License](LICENSE)。第三方脚本贡献、翻译数据、卡牌数据、商标和素材不包含在本项目 MIT 许可证的授权范围内，仍受各自权利声明约束。
