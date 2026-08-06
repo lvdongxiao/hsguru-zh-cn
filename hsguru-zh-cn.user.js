@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         HSGuru 中文助手
 // @namespace    https://github.com/lvdongxiao/hsguru-zh-cn
-// @version      1.0.0
+// @version      1.0.1
 // @description  为 HSGuru 网站提供简体中文界面
 // @author       lvdongxiao
 // @homepageURL  https://github.com/lvdongxiao/hsguru-zh-cn
@@ -721,6 +721,7 @@
     Latest: "最新",
     "Privacy Policy": "隐私政策",
     "No ads & more": "无广告及更多权益",
+    "Type or paste": "输入或粘贴",
     // 卡牌详情页
     Wiki: "维基",
     "Official Site": "官方网站",
