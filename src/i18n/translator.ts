@@ -74,6 +74,11 @@ function translateDynamicText(
 ): string | undefined {
   let match: RegExpMatchArray | null;
 
+  if ((match = content.match(/^(.+?)(\s*[↑↓])$/))) {
+    const translatedHeader = dictionary[match[1]];
+    if (translatedHeader) return `${translatedHeader}${match[2]}`;
+  }
+
   if ((match = content.match(/^(.+?) (\d+)\/(\d+)( - DeckBuilder)?$/))) {
     const name = match[1];
     const translatedName = dictionary[name] ?? translateDeckName(name);

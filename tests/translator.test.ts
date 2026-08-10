@@ -170,13 +170,12 @@ test('translates the Standard, Wild, and Brawl meta page controls', () => {
     'Stats Explanation': '数据说明',
     'To contribute use': '贡献数据请使用',
     'or the': '或',
-    'Chart ↓': '图表 ↓',
-    'Chart ↑': '图表 ↑',
+    Chart: '图表',
     "Opponent's Class": '对手职业',
     'Min Games': '最少对局数',
     'Coin?': '先后手',
     Archetype: '套牌类型',
-    'Winrate↓': '胜率↓',
+    Winrate: '胜率',
     Popularity: '热度',
     Turns: '回合数',
     Duration: '时长',
@@ -186,6 +185,15 @@ test('translates the Standard, Wild, and Brawl meta page controls', () => {
   for (const [english, chinese] of Object.entries(expected)) {
     assert.equal(translateText(english, siteDictionary), chinese);
   }
+
+  assert.equal(translateText('Chart ↓', siteDictionary), '图表 ↓');
+  assert.equal(translateText('Chart ↑', siteDictionary), '图表 ↑');
+  assert.equal(translateText('Winrate↓', siteDictionary), '胜率↓');
+  assert.equal(translateText('Winrate↑', siteDictionary), '胜率↑');
+  assert.equal(translateText('Popularity↓', siteDictionary), '热度↓');
+  assert.equal(translateText('Turns↑', siteDictionary), '回合数↑');
+  assert.equal(translateText('Duration↓', siteDictionary), '时长↓');
+  assert.equal(translateText('Climbing Speed ↑', siteDictionary), '上分速度 ↑');
 });
 
 test('translates matchup matrix controls and explanations', () => {
@@ -367,7 +375,7 @@ test('translates deck card stats headings, filters, and columns', () => {
     'Positive/Negative Colors': '正负值配色',
     Opponent: '对手',
     Card: '卡牌',
-    'Mulligan Impact↓': '起手影响↓',
+    'Mulligan Impact': '起手影响',
     'Drawn Impact': '抽到影响',
     'Not Drawn Impact': '未抽到影响',
     'Kept Impact': '留牌影响',
@@ -377,6 +385,15 @@ test('translates deck card stats headings, filters, and columns', () => {
   for (const [english, chinese] of Object.entries(expected)) {
     assert.equal(translateText(english, siteDictionary), chinese);
   }
+
+  assert.equal(translateText('Mulligan Impact↓', siteDictionary), '起手影响↓');
+  assert.equal(translateText('Mulligan Impact↑', siteDictionary), '起手影响↑');
+  assert.equal(translateText('Drawn Impact↓', siteDictionary), '抽到影响↓');
+  assert.equal(
+    translateText('Not Drawn Impact↑', siteDictionary),
+    '未抽到影响↑',
+  );
+  assert.equal(translateText('Kept Impact ↓', siteDictionary), '留牌影响 ↓');
 
   assert.equal(
     translateText('Two-Bit Rogue Deck Card Stats (Standard)', siteDictionary),
