@@ -27,6 +27,15 @@ test('translates current HSGuru shorthand names', () => {
   assert.equal(translateDeckName('Animancer Warlock'), '大哥术');
 });
 
+test('translates archetypes from the current Standard meta page', () => {
+  assert.equal(translateDeckName('Unholy DK'), '邪DK');
+  assert.equal(translateDeckName('Garona Rogue'), '迦罗娜贼');
+  assert.equal(translateDeckName('Harold Egglock'), '兆示蛋术');
+  assert.equal(translateDeckName('Egglock'), '蛋术');
+  assert.equal(translateDeckName('Godfrey Warlock'), '高弗雷术');
+  assert.equal(translateDeckName('Toki Mage'), '托奇法');
+});
+
 test('translates deck roots sampled across Standard, Wild, and Brawl', () => {
   assert.equal(
     translateDeckName('STD Contraband Face Hunter'),

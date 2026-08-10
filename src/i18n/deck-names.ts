@@ -61,6 +61,7 @@ const wordTranslations: Readonly<Record<string, string>> = {
   STD: '标准',
   LC: '安戈洛',
   Blood: '血',
+  Unholy: '邪',
   Plague: '瘟疫',
   Clone: '复制',
   Aura: '光环',
@@ -109,6 +110,7 @@ const wordTranslations: Readonly<Record<string, string>> = {
   CtA: '战斗号角',
   Deios: '戴欧斯',
   Discolock: '弃牌术',
+  Egglock: '蛋术',
   Deckless: '轮盘',
   Evenlock: '偶数术',
   Harold: '兆示',
@@ -145,6 +147,8 @@ const wordTranslations: Readonly<Record<string, string>> = {
   Ashtoungue: '灰舌',
   Broxigar: '布洛克斯加',
   Gnoll: '豺狼人',
+  Garona: '迦罗娜',
+  Godfrey: '高弗雷',
   "Il'gynoth": '伊格诺斯',
   Kingsbane: '弑君',
   Leoroxx: '莱欧洛克斯',
@@ -155,6 +159,7 @@ const wordTranslations: Readonly<Record<string, string>> = {
   Shudder: '沙德',
   "Sul'thraze": '苏萨斯',
   Switcheroo: '体型互换',
+  Toki: '托奇',
   Velarok: '威拉罗克',
 };
 
