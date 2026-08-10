@@ -12,6 +12,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: 22
@@ -20,12 +22,21 @@ jobs:
       - run: npm run check
         env:
           GITHUB_REPOSITORY: ${{ github.repository }}
+      - name: Generate release notes
+        run: node scripts/generate-release-notes.mjs "$GITHUB_REF_NAME" "$RUNNER_TEMP/release-notes.md"
+        env:
+          GITHUB_REPOSITORY: ${{ github.repository }}
       - name: Create or update GitHub Release
         run: |
           if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
             gh release upload "$GITHUB_REF_NAME" dist/hsguru-zh-cn.user.js --clobber
+            gh release edit "$GITHUB_REF_NAME" \
+              --title "HSGuru 中文助手 ${GITHUB_REF_NAME}" \
+              --notes-file "$RUNNER_TEMP/release-notes.md"
           else
-            gh release create "$GITHUB_REF_NAME" dist/hsguru-zh-cn.user.js --generate-notes
+            gh release create "$GITHUB_REF_NAME" dist/hsguru-zh-cn.user.js \
+              --title "HSGuru 中文助手 ${GITHUB_REF_NAME}" \
+              --notes-file "$RUNNER_TEMP/release-notes.md"
           fi
         env:
           GH_TOKEN: ${{ github.token }}
