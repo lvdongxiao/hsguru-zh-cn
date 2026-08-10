@@ -1,4 +1,9 @@
 import { localizeCardImages, restoreCardImages } from './card-images';
+import {
+  installChartLabelTranslation,
+  nudgeHsguruCharts,
+  redrawHsguruCharts,
+} from './chart-labels';
 import { loadCardLocalization } from './data/card-dictionary';
 import {
   installDeckClipboardTranslation,
@@ -22,6 +27,11 @@ const translator = new PageTranslator(
   cardKeywordDictionary,
 );
 let isEnabled = localStorage.getItem(storageKey) !== 'false';
+installChartLabelTranslation(
+  unsafeWindow.CanvasRenderingContext2D?.prototype,
+  dictionary,
+  () => isEnabled,
+);
 let translationMenuId: number | undefined;
 let updateCardsMenuId: number | undefined;
 let isCardUpdateInProgress = false;
@@ -60,6 +70,16 @@ function toggleTranslation(): void {
     restoreCardImages(document.documentElement);
     document.documentElement.lang = 'en';
   }
+
+  // Chart.js 的内容绘制在 Canvas 中，切换语言后直接更新当前图表实例。
+  const liveSocket = (unsafeWindow as typeof window & { liveSocket?: unknown })
+    .liveSocket;
+  unsafeWindow.requestAnimationFrame(() => {
+    if (redrawHsguruCharts(document, liveSocket) > 0) return;
+    nudgeHsguruCharts(document, (restore) => {
+      unsafeWindow.setTimeout(restore, 50);
+    });
+  });
 
   registerMenus();
 }
