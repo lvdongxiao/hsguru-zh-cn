@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         HSGuru 中文助手
 // @namespace    https://github.com/lvdongxiao/hsguru-zh-cn
-// @version      1.0.1
+// @version      1.0.2
 // @description  为 HSGuru 网站提供简体中文界面
 // @author       lvdongxiao
 // @homepageURL  https://github.com/lvdongxiao/hsguru-zh-cn
@@ -119,6 +119,637 @@
       preview.removeAttribute(originalBackgroundAttribute);
       preview.removeAttribute(localizedBackgroundAttribute);
     }
+  }
+
+  // src/i18n/deck-names.ts
+  var phraseTranslations = [
+    ["Splendiferous Whizbang", "威兹班"],
+    ["Astral Communion", "星界"],
+    ["Rock 'n' Roll", "黑石摇滚"],
+    ["'n' Roll", "黑石摇滚"],
+    ["Divine Spirit", "心火"],
+    ["Heal Burn", "治疗直伤"],
+    ["Holy Wrath", "元气"],
+    ["No Minion", "法术"],
+    ["Cliff Dive", "跳水"],
+    ["Dark Gift", "黑暗之赐"],
+    ["Void Soul", "虚空灵魂"],
+    ["Two-Bit", "二费"],
+    ["Tick Tock", "新任务"],
+    ["Huddle Up", "抱团"],
+    ["Alternate Reality", "平行现实"],
+    ["6 7", "六七费"]
+  ];
+  var wordTranslations = {
+    // 玩法与机制
+    Face: "打脸",
+    Aggro: "快攻",
+    Alignment: "超凡",
+    Amalgam: "融合怪",
+    Control: "控制",
+    Midrange: "中速",
+    Combo: "组合技",
+    Quest: "任务",
+    Questline: "任务",
+    Exodia: "艾克佐迪亚",
+    Highlander: "宇宙",
+    Handbuff: "污手",
+    Deathrattle: "亡语",
+    Secret: "奥秘",
+    Libram: "圣契",
+    Miracle: "奇迹",
+    Mill: "爆牌",
+    Token: "超生",
+    Burn: "打脸",
+    Big: "大哥",
+    Pain: "自伤",
+    Pure: "光铸",
+    Overload: "过载",
+    Weapon: "武器",
+    Spell: "法术",
+    Location: "地标",
+    Discover: "发现",
+    Outcast: "流放",
+    Starship: "星舰",
+    Rainbow: "彩虹",
+    Zoo: "动物园",
+    Egg: "蛋",
+    Thief: "脏",
+    Fatigue: "疲劳",
+    Armor: "叠甲",
+    Menagerie: "混合流",
+    Odd: "奇数",
+    Even: "偶数",
+    HL: "宇宙",
+    STD: "标准",
+    LC: "安戈洛",
+    Blood: "血",
+    Unholy: "邪",
+    Plague: "瘟疫",
+    Clone: "复制",
+    Aura: "光环",
+    Auctioneer: "加基森",
+    Automaton: "自动机",
+    Boarlock: "野猪术",
+    Champions: "勇士",
+    Cute: "可爱",
+    Freeze: "冰霜",
+    Heal: "治疗",
+    Hostage: "人质",
+    Infinity: "无限",
+    JtU: "安戈洛",
+    Kingslayer: "弑君",
+    SoU: "奥丹姆",
+    Taunt: "嘲讽",
+    Treant: "树人",
+    Warsong: "战歌",
+    // 种族、派系与法术派系
+    Beast: "野兽",
+    Mech: "机械",
+    Dragon: "龙",
+    Elemental: "元素",
+    Demon: "恶魔",
+    Draenei: "德莱尼",
+    Pirate: "海盗",
+    Murloc: "鱼人",
+    Naga: "纳迦",
+    Undead: "亡灵",
+    Protoss: "星灵",
+    Terran: "人族",
+    Zerg: "异虫",
+    Arcane: "奥术",
+    Frost: "冰霜",
+    Shadow: "暗影",
+    Fel: "邪能",
+    Holy: "神圣",
+    // HSGuru 常用卡牌或流派简称
+    AYAYA: "艾雅",
+    Ace: "王牌",
+    Chef: "主厨",
+    Companion: "伙伴",
+    Contraband: "私藏",
+    CtA: "战斗号角",
+    Deios: "戴欧斯",
+    Discolock: "弃牌术",
+    Egglock: "蛋术",
+    Deckless: "轮盘",
+    Evenlock: "偶数术",
+    Harold: "兆示",
+    Igneous: "火成",
+    Lynessa: "莱妮莎",
+    Leyline: "魔网",
+    Linecracker: "阵线破坏者",
+    Manastorm: "牢斯",
+    Mug: "法术",
+    Seedlock: "任务术",
+    Soothsayer: "预言师",
+    Imbue: "灌注",
+    Tog: "托瓦格尔",
+    Vanessa: "梵妮莎",
+    Zee: "随从",
+    "Alara'shi": "阿莱纳希",
+    Animancer: "大哥",
+    Shredslock: "撕裂术",
+    Tripwire: "绊索",
+    Rafaam: "拉法姆",
+    Rafaamlock: "拉法姆术",
+    Malygos: "玛里苟斯",
+    Merithra: "麦琳瑟拉",
+    Shudderwock: "沙德沃克",
+    Odyn: "奥丁",
+    Aviana: "艾维娜",
+    Ysera: "伊瑟拉",
+    Zarimi: "扎里米",
+    Dorian: "多里安",
+    Quasar: "类星体",
+    Asteroid: "行星",
+    Nebula: "星云",
+    Alex: "红龙",
+    Ashtoungue: "灰舌",
+    Broxigar: "布洛克斯加",
+    Gnoll: "豺狼人",
+    Garona: "迦罗娜",
+    Godfrey: "高弗雷",
+    "Il'gynoth": "伊格诺斯",
+    Kingsbane: "弑君",
+    Leoroxx: "莱欧洛克斯",
+    "Lo'Gosh": "洛戈什",
+    "Mecha'thun": "机械克苏恩",
+    "Ohn'ahra": "欧恩哈拉",
+    Rivendare: "瑞文戴尔",
+    Shudder: "沙德",
+    "Sul'thraze": "苏萨斯",
+    Switcheroo: "体型互换",
+    Toki: "托奇",
+    Velarok: "威拉罗克"
+  };
+  var classSuffixes = [
+    ["Demon Hunter", "瞎"],
+    ["Death Knight", "DK"],
+    ["Warlock", "术"],
+    ["Druid", "德"],
+    ["Priest", "牧"],
+    ["Rogue", "贼"],
+    ["Mage", "法"],
+    ["Hunter", "猎"],
+    ["Paladin", "骑"],
+    ["Shaman", "萨"],
+    ["Warrior", "战"],
+    ["DH", "瞎"],
+    ["DK", "DK"]
+  ];
+  var formatSuffixes = [
+    ["Standard", "标准模式"],
+    ["Wild", "狂野模式"],
+    ["Brawl", "乱斗模式"]
+  ];
+  function translateRuneToken(token) {
+    if (!/^[BFU]{1,4}$/.test(token)) return void 0;
+    const runes = {
+      B: "血",
+      F: "冰",
+      U: "邪"
+    };
+    return [...token].map((rune) => runes[rune]).join("");
+  }
+  function translateDeckName(source) {
+    let remaining = source.trim().replace(/\s+/g, " ");
+    if (!remaining) return source;
+    let classSuffix = "";
+    let formatSuffix = "";
+    let hasTranslation = false;
+    for (const [english, chinese] of formatSuffixes) {
+      if (remaining.endsWith(` ${english}`)) {
+        remaining = remaining.slice(0, -english.length).trim();
+        formatSuffix = ` ${chinese}`;
+        break;
+      }
+    }
+    for (const [english, chinese] of classSuffixes) {
+      if (remaining === english || remaining.endsWith(` ${english}`)) {
+        remaining = remaining.slice(0, -english.length).trim();
+        classSuffix = chinese;
+        hasTranslation = true;
+        break;
+      }
+    }
+    for (const [english, chinese] of phraseTranslations) {
+      if (remaining === english || remaining.startsWith(`${english} `) || remaining.endsWith(` ${english}`) || remaining.includes(` ${english} `)) {
+        remaining = remaining.replace(english, chinese);
+        hasTranslation = true;
+      }
+    }
+    const translatedCore = remaining.split(" ").map((word) => {
+      const translated2 = wordTranslations[word] ?? translateRuneToken(word);
+      if (translated2) hasTranslation = true;
+      return translated2 ?? word;
+    }).join("");
+    if (!hasTranslation) return source;
+    const translated = `${translatedCore}${classSuffix}${formatSuffix}`;
+    return translated && translated !== source.trim() ? translated : source;
+  }
+
+  // src/i18n/translator.ts
+  var ignoredElementNames = /* @__PURE__ */ new Set([
+    "CODE",
+    "NOSCRIPT",
+    "PRE",
+    "SCRIPT",
+    "STYLE",
+    "TEXTAREA"
+  ]);
+  var translatableAttributes = [
+    "alt",
+    "aria-label",
+    "placeholder",
+    "title"
+  ];
+  function isDeckNameNode(node) {
+    const element = node.parentElement;
+    if (!element) return false;
+    if (element.closest(".deck-title, .archetype-name")) return true;
+    if (element.matches("main h1") && /^\/deck\/\d+/.test(window.location.pathname)) {
+      return true;
+    }
+    if (/^\/matchups\/?$/.test(window.location.pathname)) {
+      if (element.matches("table td.sticky-column")) return true;
+      if (element.matches('table th button[phx-value-sort_by^="opponent_"]')) {
+        return true;
+      }
+    }
+    const dropdown = element.closest("div[x-data]");
+    const dropdownTrigger = dropdown?.querySelector(":scope > a.button");
+    const dropdownName = dropdownTrigger?.textContent?.trim();
+    if (dropdownName === "Archetypes" || dropdownName === "套牌类型") return true;
+    const link = element.closest("a[href]");
+    if (!link) return false;
+    const href = link.getAttribute("href") ?? "";
+    return /^(?:https:\/\/www\.hsguru\.com)?\/(?:deck\/\d+|archetype\/)/.test(
+      href
+    );
+  }
+  function getCardDetailField(element) {
+    if (!/^\/card\/\d+/.test(window.location.pathname)) return void 0;
+    if (element.matches("main h1")) return "name";
+    const cell = element.closest("td");
+    const row = cell?.parentElement;
+    const cells = row?.querySelectorAll(":scope > td");
+    if (!cell || !cells || cells[1] !== cell) return void 0;
+    const label = cells[0]?.textContent?.trim();
+    if (label === "Name" || label === "名称") return "name";
+    if (label === "Text" || label === "卡牌文本") return "text";
+    if (label === "Flavor Text" || label === "趣味描述") return "flavor";
+    if (label === "Keywords" || label === "关键词") return "keywords";
+    return void 0;
+  }
+  function translateDynamicText(content, dictionary2) {
+    let match;
+    if (match = content.match(/^(.+?)(\s*[↑↓])$/)) {
+      const translatedHeader = dictionary2[match[1]];
+      if (translatedHeader) return `${translatedHeader}${match[2]}`;
+    }
+    if (match = content.match(/^(.+?) (\d+)\/(\d+)( - DeckBuilder)?$/)) {
+      const name = match[1];
+      const translatedName = dictionary2[name] ?? translateDeckName(name);
+      if (translatedName !== name) {
+        const titleSuffix = match[4] ? " - 套牌构筑器" : "";
+        return `${translatedName} ${match[2]}/${match[3]}${titleSuffix}`;
+      }
+    }
+    if (match = content.match(
+      /^(.+?) (Deck|Archetype) Card Stats \((Standard|Wild|Brawl|Classic|Twist)\)$/
+    )) {
+      const deckName = translateDeckName(match[1]);
+      const statsType = match[2] === "Deck" ? "套牌" : "套牌类型";
+      const format = dictionary2[match[3]];
+      if (format) return `${deckName}${statsType}卡牌数据（${format}）`;
+    }
+    if (match = content.match(/^(.+?) - (Standard|Wild)$/)) {
+      const classAliases = {
+        DK: "Death Knight",
+        DH: "Demon Hunter"
+      };
+      const className = classAliases[match[1]] ?? match[1];
+      const translatedClass = dictionary2[className];
+      const translatedFormat = dictionary2[match[2]];
+      if (translatedClass && translatedFormat) {
+        return `${translatedClass} - ${translatedFormat}`;
+      }
+    }
+    if (match = content.match(/^(\d+) out of (\d+)$/)) {
+      return `已选 ${match[1]} 张，最多 ${match[2]} 张`;
+    }
+    if (match = content.match(/^Show ([\d,]+)$/)) {
+      return `显示 ${match[1]} 条`;
+    }
+    if (match = content.match(/^Min ([\d,]+)$/)) {
+      return `至少 ${match[1]} 局`;
+    }
+    if (match = content.match(/^Top ([\d,]+)(k?)$/i)) {
+      const value = Number(match[1].replaceAll(",", "")) * (match[2] ? 1e3 : 1);
+      return `前 ${value.toLocaleString("zh-CN")} 名`;
+    }
+    if (match = content.match(/^Past (\d+) Hours?$/)) {
+      return `过去 ${match[1]} 小时`;
+    }
+    if (content === "Past Day") return "过去 1 天";
+    if (match = content.match(/^Past (\d+) Days?$/i)) {
+      return `过去 ${match[1]} 天`;
+    }
+    if (content === "Past Week") return "过去 1 周";
+    if (match = content.match(/^Past (\d+) Weeks?$/i)) {
+      return `过去 ${match[1]} 周`;
+    }
+    if (content === "Last hour") return "最近 1 小时";
+    if (content === "Last day") return "最近 1 天";
+    if (match = content.match(/^Last (\d+) hours?$/i)) {
+      return `最近 ${match[1]} 小时`;
+    }
+    if (match = content.match(/^Last (\d+) days?$/i)) {
+      return `最近 ${match[1]} 天`;
+    }
+    if (match = content.match(/^(\d+) (second|minute|hour|day|week)s? ago$/i)) {
+      const units = {
+        second: "秒",
+        minute: "分钟",
+        hour: "小时",
+        day: "天",
+        week: "周"
+      };
+      return `${match[1]} ${units[match[2].toLowerCase()]}前`;
+    }
+    if (match = content.match(/^VS (.+)$/)) {
+      const opponent = dictionary2[match[1]];
+      if (opponent) return `对阵${opponent}`;
+    }
+    if (match = content.match(/^([\d,]+) Games?$/)) {
+      return `${match[1]} 局`;
+    }
+    if (match = content.match(/^Games: ([\d,]+)$/)) {
+      return `对局数：${match[1]}`;
+    }
+    if (match = content.match(/^Peaked By: (.+)$/)) {
+      return `最高排名玩家：${match[1]}`;
+    }
+    if (match = content.match(/^First Streamed: (.+)$/)) {
+      return `首次直播：${match[1]}`;
+    }
+    if (match = content.match(/^# Streamed: ([\d,]+)$/)) {
+      return `直播次数：${match[1]}`;
+    }
+    return void 0;
+  }
+  function replacePreservingWhitespace(source, replacement) {
+    const match = source.match(/^(\s*)(.*?)(\s*)$/s);
+    return match ? `${match[1]}${replacement}${match[3]}` : replacement;
+  }
+  function translateText(source, dictionary2) {
+    const match = source.match(/^(\s*)(.*?)(\s*)$/s);
+    if (!match) return source;
+    const content = match[2];
+    const translated = dictionary2[content] ?? translateDynamicText(content, dictionary2);
+    return translated === void 0 ? source : replacePreservingWhitespace(source, translated);
+  }
+  function translateCardTextByHref(source, href, namesByDbfId) {
+    if (source.trim() === "") return source;
+    const dbfId = getCardDbfIdFromHref(href);
+    const localizedName = dbfId ? namesByDbfId[dbfId] : void 0;
+    if (!localizedName) return source;
+    return replacePreservingWhitespace(source, localizedName);
+  }
+  function translateCardDetailTextByHref(source, href, field, namesByDbfId, textsByDbfId, flavorsByDbfId) {
+    if (source.trim() === "") return source;
+    const dbfId = getCardDbfIdFromHref(href);
+    const localized = dbfId ? {
+      name: namesByDbfId,
+      text: textsByDbfId,
+      flavor: flavorsByDbfId
+    }[field][dbfId] : void 0;
+    if (!localized) return source;
+    return replacePreservingWhitespace(source, localized);
+  }
+  function translateCardKeywords(source, dictionary2) {
+    const match = source.match(/^(\s*)(.*?)(\s*)$/s);
+    if (!match || match[2] === "") return source;
+    const keywords = match[2].split(",").map((keyword) => keyword.trim());
+    const translated = keywords.map((keyword) => dictionary2[keyword]);
+    if (translated.some((keyword) => keyword === void 0)) return source;
+    return `${match[1]}${translated.join("、")}${match[3]}`;
+  }
+  var PageTranslator = class {
+    #dictionary;
+    #cardNamesByDbfId;
+    #cardTextsByDbfId;
+    #cardFlavorsByDbfId;
+    #cardKeywordDictionary;
+    #translatedText = /* @__PURE__ */ new WeakMap();
+    #translatedAttributes = /* @__PURE__ */ new WeakMap();
+    constructor(dictionary2, cardNamesByDbfId2 = {}, cardTextsByDbfId2 = {}, cardFlavorsByDbfId2 = {}, cardKeywordDictionary2 = {}) {
+      this.#dictionary = dictionary2;
+      this.#cardNamesByDbfId = cardNamesByDbfId2;
+      this.#cardTextsByDbfId = cardTextsByDbfId2;
+      this.#cardFlavorsByDbfId = cardFlavorsByDbfId2;
+      this.#cardKeywordDictionary = cardKeywordDictionary2;
+    }
+    translate(root) {
+      if (root instanceof Text) {
+        this.#translateTextNode(root);
+        return;
+      }
+      if (!(root instanceof Element || root instanceof Document)) return;
+      if (root instanceof Element) this.#translateElementAttributes(root);
+      const walker = document.createTreeWalker(
+        root,
+        NodeFilter.SHOW_ELEMENT | NodeFilter.SHOW_TEXT
+      );
+      let current;
+      while (current = walker.nextNode()) {
+        if (current instanceof Text) {
+          this.#translateTextNode(current);
+        } else if (current instanceof Element) {
+          this.#translateElementAttributes(current);
+        }
+      }
+    }
+    restore(root) {
+      if (root instanceof Text) {
+        this.#restoreTextNode(root);
+        return;
+      }
+      if (!(root instanceof Element || root instanceof Document)) return;
+      if (root instanceof Element) this.#restoreElementAttributes(root);
+      const walker = document.createTreeWalker(
+        root,
+        NodeFilter.SHOW_ELEMENT | NodeFilter.SHOW_TEXT
+      );
+      let current;
+      while (current = walker.nextNode()) {
+        if (current instanceof Text) {
+          this.#restoreTextNode(current);
+        } else if (current instanceof Element) {
+          this.#restoreElementAttributes(current);
+        }
+      }
+    }
+    #translateTextNode(node) {
+      const parent = node.parentElement;
+      if (!parent || ignoredElementNames.has(parent.tagName)) return;
+      const previous = this.#translatedText.get(node);
+      if (previous && node.data === previous.translated) return;
+      const original = node.data;
+      let translated = translateText(original, this.#dictionary);
+      if (translated === original && parent.matches(".card-name")) {
+        const href = parent.closest('a[href*="/card/"]')?.getAttribute("href");
+        if (href) {
+          translated = translateCardTextByHref(
+            original,
+            href,
+            this.#cardNamesByDbfId
+          );
+        }
+      }
+      if (translated === original) {
+        const cardDetailField = getCardDetailField(parent);
+        if (cardDetailField) {
+          translated = cardDetailField === "keywords" ? translateCardKeywords(original, this.#cardKeywordDictionary) : translateCardDetailTextByHref(
+            original,
+            window.location.pathname,
+            cardDetailField,
+            this.#cardNamesByDbfId,
+            this.#cardTextsByDbfId,
+            this.#cardFlavorsByDbfId
+          );
+        }
+      }
+      if (translated === original && isDeckNameNode(node)) {
+        translated = translateDeckName(original);
+      }
+      if (translated === original) return;
+      this.#translatedText.set(node, { original, translated });
+      node.data = translated;
+    }
+    #restoreTextNode(node) {
+      const previous = this.#translatedText.get(node);
+      if (previous !== void 0 && node.data === previous.translated) {
+        node.data = previous.original;
+      }
+    }
+    #translateElementAttributes(element) {
+      if (ignoredElementNames.has(element.tagName) && element.tagName !== "TEXTAREA") {
+        return;
+      }
+      for (const attribute of translatableAttributes) {
+        const value = element.getAttribute(attribute);
+        if (value === null) continue;
+        const previous = this.#translatedAttributes.get(element)?.get(attribute);
+        if (previous && value === previous.translated) continue;
+        let translated = translateText(value, this.#dictionary);
+        if (translated === value && attribute === "alt") {
+          const href = element.closest('a[href*="/card/"]')?.getAttribute("href");
+          if (href) {
+            translated = translateCardTextByHref(
+              value,
+              href,
+              this.#cardNamesByDbfId
+            );
+          }
+        }
+        if (translated === value) continue;
+        let translations = this.#translatedAttributes.get(element);
+        if (!translations) {
+          translations = /* @__PURE__ */ new Map();
+          this.#translatedAttributes.set(element, translations);
+        }
+        translations.set(attribute, { original: value, translated });
+        element.setAttribute(attribute, translated);
+      }
+    }
+    #restoreElementAttributes(element) {
+      const translations = this.#translatedAttributes.get(element);
+      if (!translations) return;
+      for (const [attribute, translation] of translations) {
+        if (element.getAttribute(attribute) === translation.translated) {
+          element.setAttribute(attribute, translation.original);
+        }
+      }
+    }
+  };
+
+  // src/chart-labels.ts
+  var installedPrototypes = /* @__PURE__ */ new WeakSet();
+  function translateChartText(source, dictionary2) {
+    const interfaceText = translateText(source, dictionary2);
+    if (interfaceText !== source) return interfaceText;
+    const tooltip = source.match(/^(.+?)(:\s.*)$/s);
+    if (tooltip) {
+      const deckName = translateDeckName(tooltip[1]);
+      if (deckName !== tooltip[1]) return `${deckName}${tooltip[2]}`;
+    }
+    return translateDeckName(source);
+  }
+  function isHsguruChart(context) {
+    return Boolean(context.canvas?.closest?.('[phx-hook="ChartJs"]'));
+  }
+  function installChartLabelTranslation(prototype, dictionary2, isEnabled2) {
+    if (!prototype || installedPrototypes.has(prototype)) return false;
+    installedPrototypes.add(prototype);
+    const originalFillText = prototype.fillText;
+    const originalMeasureText = prototype.measureText;
+    const originalStrokeText = prototype.strokeText;
+    const localize = (context, text) => {
+      const source = String(text);
+      return isEnabled2() && isHsguruChart(context) ? translateChartText(source, dictionary2) : source;
+    };
+    prototype.fillText = function(text, x, y, maxWidth) {
+      const translated = localize(this, text);
+      if (maxWidth === void 0) originalFillText.call(this, translated, x, y);
+      else originalFillText.call(this, translated, x, y, maxWidth);
+    };
+    prototype.measureText = function(text) {
+      return originalMeasureText.call(this, localize(this, text));
+    };
+    prototype.strokeText = function(text, x, y, maxWidth) {
+      const translated = localize(this, text);
+      if (maxWidth === void 0) originalStrokeText.call(this, translated, x, y);
+      else originalStrokeText.call(this, translated, x, y, maxWidth);
+    };
+    return true;
+  }
+  function redrawHsguruCharts(root, liveSocket) {
+    const socket = liveSocket;
+    if (!socket) return 0;
+    let redrawn = 0;
+    for (const element of root.querySelectorAll('[phx-hook="ChartJs"]')) {
+      let view;
+      try {
+        view = socket.getViewByEl?.(element) ?? socket.main;
+      } catch {
+        view = socket.main;
+      }
+      const hook = view?.getHook?.(element) ?? Object.values(view?.viewHooks ?? {}).find((item) => item.el === element);
+      const chart = hook?.chart;
+      if (!chart?.update) continue;
+      chart.stop?.();
+      chart.update("none");
+      chart.draw?.();
+      redrawn += 1;
+    }
+    return redrawn;
+  }
+  function nudgeHsguruCharts(root, restoreLater) {
+    let nudged = 0;
+    for (const element of root.querySelectorAll('[phx-hook="ChartJs"]')) {
+      const container = element;
+      const width = container.getBoundingClientRect?.().width;
+      if (!width || width <= 1 || !container.style) continue;
+      const originalWidth = container.style.width;
+      container.style.width = `${Math.floor(width) - 1}px`;
+      restoreLater(() => {
+        container.style.width = originalWidth;
+      });
+      nudged += 1;
+    }
+    return nudged;
   }
 
   // src/data/card-dictionary.ts
@@ -287,229 +918,6 @@
       }
       throw error;
     }
-  }
-
-  // src/i18n/deck-names.ts
-  var phraseTranslations = [
-    ["Splendiferous Whizbang", "威兹班"],
-    ["Astral Communion", "星界"],
-    ["Rock 'n' Roll", "黑石摇滚"],
-    ["'n' Roll", "黑石摇滚"],
-    ["Divine Spirit", "心火"],
-    ["Heal Burn", "治疗直伤"],
-    ["Holy Wrath", "元气"],
-    ["No Minion", "法术"],
-    ["Cliff Dive", "跳水"],
-    ["Dark Gift", "黑暗之赐"],
-    ["Void Soul", "虚空灵魂"],
-    ["Two-Bit", "二费"],
-    ["Tick Tock", "新任务"],
-    ["Huddle Up", "抱团"],
-    ["Alternate Reality", "平行现实"],
-    ["6 7", "六七费"]
-  ];
-  var wordTranslations = {
-    // 玩法与机制
-    Face: "打脸",
-    Aggro: "快攻",
-    Alignment: "超凡",
-    Amalgam: "融合怪",
-    Control: "控制",
-    Midrange: "中速",
-    Combo: "组合技",
-    Quest: "任务",
-    Questline: "任务",
-    Exodia: "艾克佐迪亚",
-    Highlander: "宇宙",
-    Handbuff: "污手",
-    Deathrattle: "亡语",
-    Secret: "奥秘",
-    Libram: "圣契",
-    Miracle: "奇迹",
-    Mill: "爆牌",
-    Token: "超生",
-    Burn: "打脸",
-    Big: "大哥",
-    Pain: "自伤",
-    Pure: "光铸",
-    Overload: "过载",
-    Weapon: "武器",
-    Spell: "法术",
-    Location: "地标",
-    Discover: "发现",
-    Outcast: "流放",
-    Starship: "星舰",
-    Rainbow: "彩虹",
-    Zoo: "动物园",
-    Egg: "蛋",
-    Thief: "脏",
-    Fatigue: "疲劳",
-    Armor: "叠甲",
-    Menagerie: "混合流",
-    Odd: "奇数",
-    Even: "偶数",
-    HL: "宇宙",
-    STD: "标准",
-    LC: "安戈洛",
-    Blood: "血",
-    Plague: "瘟疫",
-    Clone: "复制",
-    Aura: "光环",
-    Auctioneer: "加基森",
-    Automaton: "自动机",
-    Boarlock: "野猪术",
-    Champions: "勇士",
-    Cute: "可爱",
-    Freeze: "冰霜",
-    Heal: "治疗",
-    Hostage: "人质",
-    Infinity: "无限",
-    JtU: "安戈洛",
-    Kingslayer: "弑君",
-    SoU: "奥丹姆",
-    Taunt: "嘲讽",
-    Treant: "树人",
-    Warsong: "战歌",
-    // 种族、派系与法术派系
-    Beast: "野兽",
-    Mech: "机械",
-    Dragon: "龙",
-    Elemental: "元素",
-    Demon: "恶魔",
-    Draenei: "德莱尼",
-    Pirate: "海盗",
-    Murloc: "鱼人",
-    Naga: "纳迦",
-    Undead: "亡灵",
-    Protoss: "星灵",
-    Terran: "人族",
-    Zerg: "异虫",
-    Arcane: "奥术",
-    Frost: "冰霜",
-    Shadow: "暗影",
-    Fel: "邪能",
-    Holy: "神圣",
-    // HSGuru 常用卡牌或流派简称
-    AYAYA: "艾雅",
-    Ace: "王牌",
-    Chef: "主厨",
-    Companion: "伙伴",
-    Contraband: "私藏",
-    CtA: "战斗号角",
-    Deios: "戴欧斯",
-    Discolock: "弃牌术",
-    Deckless: "轮盘",
-    Evenlock: "偶数术",
-    Harold: "兆示",
-    Igneous: "火成",
-    Lynessa: "莱妮莎",
-    Leyline: "魔网",
-    Linecracker: "阵线破坏者",
-    Manastorm: "牢斯",
-    Mug: "法术",
-    Seedlock: "任务术",
-    Soothsayer: "预言师",
-    Imbue: "灌注",
-    Tog: "托瓦格尔",
-    Vanessa: "梵妮莎",
-    Zee: "随从",
-    "Alara'shi": "阿莱纳希",
-    Animancer: "大哥",
-    Shredslock: "撕裂术",
-    Tripwire: "绊索",
-    Rafaam: "拉法姆",
-    Rafaamlock: "拉法姆术",
-    Malygos: "玛里苟斯",
-    Merithra: "麦琳瑟拉",
-    Shudderwock: "沙德沃克",
-    Odyn: "奥丁",
-    Aviana: "艾维娜",
-    Ysera: "伊瑟拉",
-    Zarimi: "扎里米",
-    Dorian: "多里安",
-    Quasar: "类星体",
-    Asteroid: "行星",
-    Nebula: "星云",
-    Alex: "红龙",
-    Ashtoungue: "灰舌",
-    Broxigar: "布洛克斯加",
-    Gnoll: "豺狼人",
-    "Il'gynoth": "伊格诺斯",
-    Kingsbane: "弑君",
-    Leoroxx: "莱欧洛克斯",
-    "Lo'Gosh": "洛戈什",
-    "Mecha'thun": "机械克苏恩",
-    "Ohn'ahra": "欧恩哈拉",
-    Rivendare: "瑞文戴尔",
-    Shudder: "沙德",
-    "Sul'thraze": "苏萨斯",
-    Switcheroo: "体型互换",
-    Velarok: "威拉罗克"
-  };
-  var classSuffixes = [
-    ["Demon Hunter", "瞎"],
-    ["Death Knight", "DK"],
-    ["Warlock", "术"],
-    ["Druid", "德"],
-    ["Priest", "牧"],
-    ["Rogue", "贼"],
-    ["Mage", "法"],
-    ["Hunter", "猎"],
-    ["Paladin", "骑"],
-    ["Shaman", "萨"],
-    ["Warrior", "战"],
-    ["DH", "瞎"],
-    ["DK", "DK"]
-  ];
-  var formatSuffixes = [
-    ["Standard", "标准模式"],
-    ["Wild", "狂野模式"],
-    ["Brawl", "乱斗模式"]
-  ];
-  function translateRuneToken(token) {
-    if (!/^[BFU]{1,4}$/.test(token)) return void 0;
-    const runes = {
-      B: "血",
-      F: "冰",
-      U: "邪"
-    };
-    return [...token].map((rune) => runes[rune]).join("");
-  }
-  function translateDeckName(source) {
-    let remaining = source.trim().replace(/\s+/g, " ");
-    if (!remaining) return source;
-    let classSuffix = "";
-    let formatSuffix = "";
-    let hasTranslation = false;
-    for (const [english, chinese] of formatSuffixes) {
-      if (remaining.endsWith(` ${english}`)) {
-        remaining = remaining.slice(0, -english.length).trim();
-        formatSuffix = ` ${chinese}`;
-        break;
-      }
-    }
-    for (const [english, chinese] of classSuffixes) {
-      if (remaining === english || remaining.endsWith(` ${english}`)) {
-        remaining = remaining.slice(0, -english.length).trim();
-        classSuffix = chinese;
-        hasTranslation = true;
-        break;
-      }
-    }
-    for (const [english, chinese] of phraseTranslations) {
-      if (remaining === english || remaining.startsWith(`${english} `) || remaining.endsWith(` ${english}`) || remaining.includes(` ${english} `)) {
-        remaining = remaining.replace(english, chinese);
-        hasTranslation = true;
-      }
-    }
-    const translatedCore = remaining.split(" ").map((word) => {
-      const translated2 = wordTranslations[word] ?? translateRuneToken(word);
-      if (translated2) hasTranslation = true;
-      return translated2 ?? word;
-    }).join("");
-    if (!hasTranslation) return source;
-    const translated = `${translatedCore}${classSuffix}${formatSuffix}`;
-    return translated && translated !== source.trim() ? translated : source;
   }
 
   // src/clipboard.ts
@@ -844,8 +1252,7 @@
     "Stats Explanation": "数据说明",
     "To contribute use": "贡献数据请使用",
     "or the": "或",
-    "Chart ↓": "图表 ↓",
-    "Chart ↑": "图表 ↑",
+    Chart: "图表",
     "Post patch archetyping will be updated a couple days post patch": "补丁更新后，套牌分类将在数日内更新",
     "Card Stats": "卡牌数据",
     "Card Stats (Mulligan)": "卡牌数据（起手留牌）",
@@ -860,7 +1267,7 @@
     "Weighted Colors": "加权配色",
     "Positive/Negative Colors": "正负值配色",
     Opponent: "对手",
-    "Mulligan Impact↓": "起手影响↓",
+    "Mulligan Impact": "起手影响",
     "Drawn Impact": "抽到影响",
     "Not Drawn Impact": "未抽到影响",
     "Kept Impact": "留牌影响",
@@ -883,7 +1290,6 @@
     Duration: "时长",
     Turns: "回合数",
     "Climbing Speed": "上分速度",
-    "Winrate↓": "胜率↓",
     "Seed Weights": "按热度填充权重",
     "Reset Weights": "重置权重",
     "Popularity:": "热度：",
@@ -1008,328 +1414,6 @@
     "Curse of Naxxramas": "纳克萨玛斯的诅咒"
   };
 
-  // src/i18n/translator.ts
-  var ignoredElementNames = /* @__PURE__ */ new Set([
-    "CODE",
-    "NOSCRIPT",
-    "PRE",
-    "SCRIPT",
-    "STYLE",
-    "TEXTAREA"
-  ]);
-  var translatableAttributes = [
-    "alt",
-    "aria-label",
-    "placeholder",
-    "title"
-  ];
-  function isDeckNameNode(node) {
-    const element = node.parentElement;
-    if (!element) return false;
-    if (element.closest(".deck-title, .archetype-name")) return true;
-    if (element.matches("main h1") && /^\/deck\/\d+/.test(window.location.pathname)) {
-      return true;
-    }
-    if (/^\/matchups\/?$/.test(window.location.pathname)) {
-      if (element.matches("table td.sticky-column")) return true;
-      if (element.matches('table th button[phx-value-sort_by^="opponent_"]')) {
-        return true;
-      }
-    }
-    const dropdown = element.closest("div[x-data]");
-    const dropdownTrigger = dropdown?.querySelector(":scope > a.button");
-    const dropdownName = dropdownTrigger?.textContent?.trim();
-    if (dropdownName === "Archetypes" || dropdownName === "套牌类型") return true;
-    const link = element.closest("a[href]");
-    if (!link) return false;
-    const href = link.getAttribute("href") ?? "";
-    return /^(?:https:\/\/www\.hsguru\.com)?\/(?:deck\/\d+|archetype\/)/.test(
-      href
-    );
-  }
-  function getCardDetailField(element) {
-    if (!/^\/card\/\d+/.test(window.location.pathname)) return void 0;
-    if (element.matches("main h1")) return "name";
-    const cell = element.closest("td");
-    const row = cell?.parentElement;
-    const cells = row?.querySelectorAll(":scope > td");
-    if (!cell || !cells || cells[1] !== cell) return void 0;
-    const label = cells[0]?.textContent?.trim();
-    if (label === "Name" || label === "名称") return "name";
-    if (label === "Text" || label === "卡牌文本") return "text";
-    if (label === "Flavor Text" || label === "趣味描述") return "flavor";
-    if (label === "Keywords" || label === "关键词") return "keywords";
-    return void 0;
-  }
-  function translateDynamicText(content, dictionary2) {
-    let match;
-    if (match = content.match(/^(.+?) (\d+)\/(\d+)( - DeckBuilder)?$/)) {
-      const name = match[1];
-      const translatedName = dictionary2[name] ?? translateDeckName(name);
-      if (translatedName !== name) {
-        const titleSuffix = match[4] ? " - 套牌构筑器" : "";
-        return `${translatedName} ${match[2]}/${match[3]}${titleSuffix}`;
-      }
-    }
-    if (match = content.match(
-      /^(.+?) (Deck|Archetype) Card Stats \((Standard|Wild|Brawl|Classic|Twist)\)$/
-    )) {
-      const deckName = translateDeckName(match[1]);
-      const statsType = match[2] === "Deck" ? "套牌" : "套牌类型";
-      const format = dictionary2[match[3]];
-      if (format) return `${deckName}${statsType}卡牌数据（${format}）`;
-    }
-    if (match = content.match(/^(.+?) - (Standard|Wild)$/)) {
-      const classAliases = {
-        DK: "Death Knight",
-        DH: "Demon Hunter"
-      };
-      const className = classAliases[match[1]] ?? match[1];
-      const translatedClass = dictionary2[className];
-      const translatedFormat = dictionary2[match[2]];
-      if (translatedClass && translatedFormat) {
-        return `${translatedClass} - ${translatedFormat}`;
-      }
-    }
-    if (match = content.match(/^(\d+) out of (\d+)$/)) {
-      return `已选 ${match[1]} 张，最多 ${match[2]} 张`;
-    }
-    if (match = content.match(/^Show ([\d,]+)$/)) {
-      return `显示 ${match[1]} 条`;
-    }
-    if (match = content.match(/^Min ([\d,]+)$/)) {
-      return `至少 ${match[1]} 局`;
-    }
-    if (match = content.match(/^Top ([\d,]+)(k?)$/i)) {
-      const value = Number(match[1].replaceAll(",", "")) * (match[2] ? 1e3 : 1);
-      return `前 ${value.toLocaleString("zh-CN")} 名`;
-    }
-    if (match = content.match(/^Past (\d+) Hours?$/)) {
-      return `过去 ${match[1]} 小时`;
-    }
-    if (content === "Past Day") return "过去 1 天";
-    if (match = content.match(/^Past (\d+) Days?$/i)) {
-      return `过去 ${match[1]} 天`;
-    }
-    if (content === "Past Week") return "过去 1 周";
-    if (match = content.match(/^Past (\d+) Weeks?$/i)) {
-      return `过去 ${match[1]} 周`;
-    }
-    if (content === "Last hour") return "最近 1 小时";
-    if (content === "Last day") return "最近 1 天";
-    if (match = content.match(/^Last (\d+) hours?$/i)) {
-      return `最近 ${match[1]} 小时`;
-    }
-    if (match = content.match(/^Last (\d+) days?$/i)) {
-      return `最近 ${match[1]} 天`;
-    }
-    if (match = content.match(/^(\d+) (second|minute|hour|day|week)s? ago$/i)) {
-      const units = {
-        second: "秒",
-        minute: "分钟",
-        hour: "小时",
-        day: "天",
-        week: "周"
-      };
-      return `${match[1]} ${units[match[2].toLowerCase()]}前`;
-    }
-    if (match = content.match(/^VS (.+)$/)) {
-      const opponent = dictionary2[match[1]];
-      if (opponent) return `对阵${opponent}`;
-    }
-    if (match = content.match(/^([\d,]+) Games?$/)) {
-      return `${match[1]} 局`;
-    }
-    if (match = content.match(/^Games: ([\d,]+)$/)) {
-      return `对局数：${match[1]}`;
-    }
-    if (match = content.match(/^Peaked By: (.+)$/)) {
-      return `最高排名玩家：${match[1]}`;
-    }
-    if (match = content.match(/^First Streamed: (.+)$/)) {
-      return `首次直播：${match[1]}`;
-    }
-    if (match = content.match(/^# Streamed: ([\d,]+)$/)) {
-      return `直播次数：${match[1]}`;
-    }
-    return void 0;
-  }
-  function replacePreservingWhitespace(source, replacement) {
-    const match = source.match(/^(\s*)(.*?)(\s*)$/s);
-    return match ? `${match[1]}${replacement}${match[3]}` : replacement;
-  }
-  function translateText(source, dictionary2) {
-    const match = source.match(/^(\s*)(.*?)(\s*)$/s);
-    if (!match) return source;
-    const content = match[2];
-    const translated = dictionary2[content] ?? translateDynamicText(content, dictionary2);
-    return translated === void 0 ? source : replacePreservingWhitespace(source, translated);
-  }
-  function translateCardTextByHref(source, href, namesByDbfId) {
-    if (source.trim() === "") return source;
-    const dbfId = getCardDbfIdFromHref(href);
-    const localizedName = dbfId ? namesByDbfId[dbfId] : void 0;
-    if (!localizedName) return source;
-    return replacePreservingWhitespace(source, localizedName);
-  }
-  function translateCardDetailTextByHref(source, href, field, namesByDbfId, textsByDbfId, flavorsByDbfId) {
-    if (source.trim() === "") return source;
-    const dbfId = getCardDbfIdFromHref(href);
-    const localized = dbfId ? {
-      name: namesByDbfId,
-      text: textsByDbfId,
-      flavor: flavorsByDbfId
-    }[field][dbfId] : void 0;
-    if (!localized) return source;
-    return replacePreservingWhitespace(source, localized);
-  }
-  function translateCardKeywords(source, dictionary2) {
-    const match = source.match(/^(\s*)(.*?)(\s*)$/s);
-    if (!match || match[2] === "") return source;
-    const keywords = match[2].split(",").map((keyword) => keyword.trim());
-    const translated = keywords.map((keyword) => dictionary2[keyword]);
-    if (translated.some((keyword) => keyword === void 0)) return source;
-    return `${match[1]}${translated.join("、")}${match[3]}`;
-  }
-  var PageTranslator = class {
-    #dictionary;
-    #cardNamesByDbfId;
-    #cardTextsByDbfId;
-    #cardFlavorsByDbfId;
-    #cardKeywordDictionary;
-    #translatedText = /* @__PURE__ */ new WeakMap();
-    #translatedAttributes = /* @__PURE__ */ new WeakMap();
-    constructor(dictionary2, cardNamesByDbfId2 = {}, cardTextsByDbfId2 = {}, cardFlavorsByDbfId2 = {}, cardKeywordDictionary2 = {}) {
-      this.#dictionary = dictionary2;
-      this.#cardNamesByDbfId = cardNamesByDbfId2;
-      this.#cardTextsByDbfId = cardTextsByDbfId2;
-      this.#cardFlavorsByDbfId = cardFlavorsByDbfId2;
-      this.#cardKeywordDictionary = cardKeywordDictionary2;
-    }
-    translate(root) {
-      if (root instanceof Text) {
-        this.#translateTextNode(root);
-        return;
-      }
-      if (!(root instanceof Element || root instanceof Document)) return;
-      if (root instanceof Element) this.#translateElementAttributes(root);
-      const walker = document.createTreeWalker(
-        root,
-        NodeFilter.SHOW_ELEMENT | NodeFilter.SHOW_TEXT
-      );
-      let current;
-      while (current = walker.nextNode()) {
-        if (current instanceof Text) {
-          this.#translateTextNode(current);
-        } else if (current instanceof Element) {
-          this.#translateElementAttributes(current);
-        }
-      }
-    }
-    restore(root) {
-      if (root instanceof Text) {
-        this.#restoreTextNode(root);
-        return;
-      }
-      if (!(root instanceof Element || root instanceof Document)) return;
-      if (root instanceof Element) this.#restoreElementAttributes(root);
-      const walker = document.createTreeWalker(
-        root,
-        NodeFilter.SHOW_ELEMENT | NodeFilter.SHOW_TEXT
-      );
-      let current;
-      while (current = walker.nextNode()) {
-        if (current instanceof Text) {
-          this.#restoreTextNode(current);
-        } else if (current instanceof Element) {
-          this.#restoreElementAttributes(current);
-        }
-      }
-    }
-    #translateTextNode(node) {
-      const parent = node.parentElement;
-      if (!parent || ignoredElementNames.has(parent.tagName)) return;
-      const previous = this.#translatedText.get(node);
-      if (previous && node.data === previous.translated) return;
-      const original = node.data;
-      let translated = translateText(original, this.#dictionary);
-      if (translated === original && parent.matches(".card-name")) {
-        const href = parent.closest('a[href*="/card/"]')?.getAttribute("href");
-        if (href) {
-          translated = translateCardTextByHref(
-            original,
-            href,
-            this.#cardNamesByDbfId
-          );
-        }
-      }
-      if (translated === original) {
-        const cardDetailField = getCardDetailField(parent);
-        if (cardDetailField) {
-          translated = cardDetailField === "keywords" ? translateCardKeywords(original, this.#cardKeywordDictionary) : translateCardDetailTextByHref(
-            original,
-            window.location.pathname,
-            cardDetailField,
-            this.#cardNamesByDbfId,
-            this.#cardTextsByDbfId,
-            this.#cardFlavorsByDbfId
-          );
-        }
-      }
-      if (translated === original && isDeckNameNode(node)) {
-        translated = translateDeckName(original);
-      }
-      if (translated === original) return;
-      this.#translatedText.set(node, { original, translated });
-      node.data = translated;
-    }
-    #restoreTextNode(node) {
-      const previous = this.#translatedText.get(node);
-      if (previous !== void 0 && node.data === previous.translated) {
-        node.data = previous.original;
-      }
-    }
-    #translateElementAttributes(element) {
-      if (ignoredElementNames.has(element.tagName) && element.tagName !== "TEXTAREA") {
-        return;
-      }
-      for (const attribute of translatableAttributes) {
-        const value = element.getAttribute(attribute);
-        if (value === null) continue;
-        const previous = this.#translatedAttributes.get(element)?.get(attribute);
-        if (previous && value === previous.translated) continue;
-        let translated = translateText(value, this.#dictionary);
-        if (translated === value && attribute === "alt") {
-          const href = element.closest('a[href*="/card/"]')?.getAttribute("href");
-          if (href) {
-            translated = translateCardTextByHref(
-              value,
-              href,
-              this.#cardNamesByDbfId
-            );
-          }
-        }
-        if (translated === value) continue;
-        let translations = this.#translatedAttributes.get(element);
-        if (!translations) {
-          translations = /* @__PURE__ */ new Map();
-          this.#translatedAttributes.set(element, translations);
-        }
-        translations.set(attribute, { original: value, translated });
-        element.setAttribute(attribute, translated);
-      }
-    }
-    #restoreElementAttributes(element) {
-      const translations = this.#translatedAttributes.get(element);
-      if (!translations) return;
-      for (const [attribute, translation] of translations) {
-        if (element.getAttribute(attribute) === translation.translated) {
-          element.setAttribute(attribute, translation.original);
-        }
-      }
-    }
-  };
-
   // src/index.ts
   var storageKey = "hsguru-zh-cn:enabled";
   var runtimeDictionary = { ...dictionary };
@@ -1346,6 +1430,11 @@
     cardKeywordDictionary
   );
   var isEnabled = localStorage.getItem(storageKey) !== "false";
+  installChartLabelTranslation(
+    unsafeWindow.CanvasRenderingContext2D?.prototype,
+    dictionary,
+    () => isEnabled
+  );
   var translationMenuId;
   var updateCardsMenuId;
   var isCardUpdateInProgress = false;
@@ -1377,6 +1466,13 @@
       restoreCardImages(document.documentElement);
       document.documentElement.lang = "en";
     }
+    const liveSocket = unsafeWindow.liveSocket;
+    unsafeWindow.requestAnimationFrame(() => {
+      if (redrawHsguruCharts(document, liveSocket) > 0) return;
+      nudgeHsguruCharts(document, (restore) => {
+        unsafeWindow.setTimeout(restore, 50);
+      });
+    });
     registerMenus();
   }
   function registerMenus() {
