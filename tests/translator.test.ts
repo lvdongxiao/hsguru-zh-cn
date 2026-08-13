@@ -23,6 +23,14 @@ test('translates the homepage input placeholder', () => {
   assert.equal(translateText('Type or paste', siteDictionary), '输入或粘贴');
 });
 
+test('translates the signed-out player stats page', () => {
+  assert.equal(
+    translateText('You need to log in to view this page', siteDictionary),
+    '你需要登录才能查看此页面',
+  );
+  assert.equal(translateText('Log in', siteDictionary), '登录');
+});
+
 test('translates every desktop navigation dropdown item', () => {
   const expected: Readonly<Record<string, string>> = {
     'Player Profile': '玩家资料',
