@@ -19,6 +19,16 @@ const translatableAttributes = [
   'title',
 ] as const;
 
+const deckNameDropdownNames = new Set([
+  'Archetype',
+  'Archetypes',
+  'Deck Archetype',
+  'Opponent Archetype',
+  'Opponent Archetypes',
+  '套牌类型',
+  '对手套牌类型',
+]);
+
 function isDeckNameNode(node: Text): boolean {
   const element = node.parentElement;
   if (!element) return false;
@@ -39,7 +49,9 @@ function isDeckNameNode(node: Text): boolean {
   const dropdown = element.closest('div[x-data]');
   const dropdownTrigger = dropdown?.querySelector(':scope > a.button');
   const dropdownName = dropdownTrigger?.textContent?.trim();
-  if (dropdownName === 'Archetypes' || dropdownName === '套牌类型') return true;
+  if (dropdownName && deckNameDropdownNames.has(dropdownName)) {
+    return true;
+  }
 
   const link = element.closest('a[href]');
   if (!link) return false;
@@ -75,7 +87,8 @@ function translateDynamicText(
   let match: RegExpMatchArray | null;
 
   if ((match = content.match(/^(.+?)(\s*[↑↓])$/))) {
-    const translatedHeader = dictionary[match[1]];
+    const translatedHeader =
+      dictionary[match[1]] ?? translateDynamicText(match[1], dictionary);
     if (translatedHeader) return `${translatedHeader}${match[2]}`;
   }
 
@@ -116,12 +129,41 @@ function translateDynamicText(
   if ((match = content.match(/^Show ([\d,]+)$/))) {
     return `显示 ${match[1]} 条`;
   }
+  if ((match = content.match(/^Min ([\d,]+) Finishes?$/))) {
+    return `至少完赛 ${match[1]} 次`;
+  }
   if ((match = content.match(/^Min ([\d,]+)$/))) {
     return `至少 ${match[1]} 局`;
   }
   if ((match = content.match(/^Top ([\d,]+)(k?)$/i))) {
     const value = Number(match[1].replaceAll(',', '')) * (match[2] ? 1000 : 1);
     return `前 ${value.toLocaleString('zh-CN')} 名`;
+  }
+  if ((match = content.match(/^Total Players: ([\d,]+)$/))) {
+    return `玩家总数：${match[1]}`;
+  }
+  if ((match = content.match(/^(\d{4}) Standard$/))) {
+    return `${match[1]} 标准模式`;
+  }
+  if ((match = content.match(/^(\d{4}) Announcement$/))) {
+    return `${match[1]} 年公告`;
+  }
+  if (
+    (match = content.match(
+      /^(?:(China) )?(\d{4}) (Spring|Summer|Fall|Winter)$/,
+    ))
+  ) {
+    const seasonNames: Readonly<Record<string, string>> = {
+      Spring: '春季',
+      Summer: '夏季',
+      Fall: '秋季',
+      Winter: '冬季',
+    };
+    const country = match[1] ? '中国 ' : '';
+    return `${country}${match[2]} 年${seasonNames[match[3]]}`;
+  }
+  if ((match = content.match(/^(\d{4}) Last Chance$/))) {
+    return `${match[1]} 年最终资格赛`;
   }
   if ((match = content.match(/^Past (\d+) Hours?$/))) {
     return `过去 ${match[1]} 小时`;
@@ -171,6 +213,12 @@ function translateDynamicText(
   if ((match = content.match(/^# Streamed: ([\d,]+)$/))) {
     return `直播次数：${match[1]}`;
   }
+  if ((match = content.match(/^Connections \((\d+)\/(\d+)\)$/))) {
+    return `连接（${match[1]}/${match[2]}）`;
+  }
+  if ((match = content.match(/^Tier: (.+?) \| Ad Free: (.+)$/))) {
+    return `等级：${match[1]} | 无广告：${match[2]}`;
+  }
 
   return undefined;
 }
@@ -181,6 +229,37 @@ function replacePreservingWhitespace(
 ): string {
   const match = source.match(/^(\s*)(.*?)(\s*)$/s);
   return match ? `${match[1]}${replacement}${match[3]}` : replacement;
+}
+
+const chineseRegionNames =
+  typeof Intl.DisplayNames === 'function'
+    ? new Intl.DisplayNames(['zh-CN'], { type: 'region' })
+    : undefined;
+
+export function translateCountryOption(
+  source: string,
+  countryCode: string,
+): string {
+  if (!chineseRegionNames || !/^[A-Z]{2}$/.test(countryCode)) return source;
+
+  const translated = chineseRegionNames.of(countryCode);
+  return translated && translated !== countryCode
+    ? replacePreservingWhitespace(source, translated)
+    : source;
+}
+
+function getCountryCodeFromElement(element: Element): string | undefined {
+  if (
+    element instanceof HTMLOptionElement &&
+    element.parentElement?.matches('select[name="country_code"]')
+  ) {
+    return element.value;
+  }
+
+  const countryLabel = element.closest('label[for^="country["]');
+  return countryLabel
+    ?.getAttribute('for')
+    ?.match(/^country\[([A-Z]{2})\]$/)?.[1];
 }
 
 export function translateText(
@@ -338,6 +417,12 @@ export class PageTranslator {
 
     const original = node.data;
     let translated = translateText(original, this.#dictionary);
+    if (translated === original) {
+      const countryCode = getCountryCodeFromElement(parent);
+      if (countryCode) {
+        translated = translateCountryOption(original, countryCode);
+      }
+    }
     if (translated === original && parent.matches('.card-name')) {
       const href = parent.closest('a[href*="/card/"]')?.getAttribute('href');
       if (href) {

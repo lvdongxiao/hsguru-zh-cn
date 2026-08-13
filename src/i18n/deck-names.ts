@@ -1,4 +1,5 @@
 const phraseTranslations: ReadonlyArray<readonly [string, string]> = [
+  ['End of Turnadin', '回合结束骑'],
   ['Splendiferous Whizbang', '威兹班'],
   ['Astral Communion', '星界'],
   ["Rock 'n' Roll", '黑石摇滚'],
@@ -20,6 +21,7 @@ const phraseTranslations: ReadonlyArray<readonly [string, string]> = [
 const wordTranslations: Readonly<Record<string, string>> = {
   // 玩法与机制
   Face: '打脸',
+  Attack: '攻击',
   Aggro: '快攻',
   Alignment: '超凡',
   Amalgam: '融合怪',
@@ -80,6 +82,8 @@ const wordTranslations: Readonly<Record<string, string>> = {
   Taunt: '嘲讽',
   Treant: '树人',
   Warsong: '战歌',
+  Void: '虚空',
+  Prepared: '预备',
 
   // 种族、派系与法术派系
   Beast: '野兽',
@@ -132,6 +136,8 @@ const wordTranslations: Readonly<Record<string, string>> = {
   Tripwire: '绊索',
   Rafaam: '拉法姆',
   Rafaamlock: '拉法姆术',
+  "Thal'ena": '萨安娜',
+  Bwonsamdi: '邦桑迪',
   Malygos: '玛里苟斯',
   Merithra: '麦琳瑟拉',
   Shudderwock: '沙德沃克',
@@ -148,6 +154,8 @@ const wordTranslations: Readonly<Record<string, string>> = {
   Broxigar: '布洛克斯加',
   Gnoll: '豺狼人',
   Garona: '迦罗娜',
+  Azshara: '艾萨拉',
+  Barnes: '巴内斯',
   Godfrey: '高弗雷',
   "Il'gynoth": '伊格诺斯',
   Kingsbane: '弑君',
@@ -160,6 +168,7 @@ const wordTranslations: Readonly<Record<string, string>> = {
   "Sul'thraze": '苏萨斯',
   Switcheroo: '体型互换',
   Toki: '托奇',
+  Moragg: '摩拉格',
   Velarok: '威拉罗克',
 };
 

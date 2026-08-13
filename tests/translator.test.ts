@@ -5,6 +5,7 @@ import {
   translateCardDetailTextByHref,
   translateCardKeywords,
   translateCardTextByHref,
+  translateCountryOption,
   translateText,
 } from '../src/i18n/translator';
 
@@ -20,6 +21,263 @@ test('translates an exact dictionary entry', () => {
 
 test('translates the homepage input placeholder', () => {
   assert.equal(translateText('Type or paste', siteDictionary), '输入或粘贴');
+});
+
+test('translates every desktop navigation dropdown item', () => {
+  const expected: Readonly<Record<string, string>> = {
+    'Player Profile': '玩家资料',
+    'Deck Sheets': '套牌表',
+    'My Matchups': '我的对局',
+    'My Decks': '我的套牌',
+    'My Replays': '我的对局回放',
+    'My Groups': '我的群组',
+    Collection: '我的收藏',
+    Settings: '设置',
+    Logout: '退出登录',
+    'Player Stats': '玩家数据',
+    'HSEsports Points': '炉石电竞积分',
+    Europe: '欧洲',
+    Americas: '美洲',
+    'Asia-Pacific': '亚太',
+    China: '中国',
+    Standard: '标准模式',
+    Wild: '狂野模式',
+    Brawl: '乱斗模式',
+    Deckviewer: '套牌查看器',
+    Deckbuilder: '套牌构筑器',
+    Cards: '卡牌',
+    'Legacy HSEsports': '往期炉石电竞',
+    Replays: '对局回放',
+    '3rd Party Tournaments': '第三方赛事',
+    'Battlefy Multi Tournament Stats': 'Battlefy 多赛事数据',
+    'Streaming Now': '正在直播',
+    Fantasy: '梦幻联赛',
+    'Batch Lineup Importer': '批量阵容导入',
+    'Chat Bot Hooks': '聊天机器人接口',
+    'Discord Bot': 'Discord 机器人',
+    'HDT Plugin': 'HDT 插件',
+    About: '关于',
+  };
+
+  for (const [english, chinese] of Object.entries(expected)) {
+    assert.equal(translateText(english, siteDictionary), chinese);
+  }
+});
+
+test('translates signed-in user pages', () => {
+  const expected: Readonly<Record<string, string>> = {
+    Leaderboard: '排行榜',
+    'Leaderboard Region': '排行榜赛区',
+    Battlegrounds: '酒馆战棋',
+    'Battlegrounds Duos': '酒馆战棋双打',
+    Mercenaries: '佣兵战纪',
+    'Legacy Arena': '传统竞技场',
+    'Underground Arena': '地下竞技场',
+    Competitions: '赛事',
+    Competition: '赛事',
+    Qualifiers: '资格赛',
+    MTs: '大师巡回赛',
+    Place: '名次',
+    Score: '积分',
+    Submit: '提交',
+    New: '新建',
+    Delete: '删除',
+    Owner: '所有者',
+    Group: '群组',
+    Actions: '操作',
+    'Player: Deck Archetype': '玩家：套牌类型',
+    'Deck Archetype': '套牌类型',
+    'Opponent: Class': '对手：职业',
+    'Percentage %': '百分比 %',
+    'Preparing stats...': '正在准备数据…',
+    Share: '分享',
+    Use: '使用',
+    'Powered By': '数据来源：',
+    'Share your public decks': '分享你的公开套牌',
+    'Share your public replays': '分享你的公开对局回放',
+    'All Formats': '全部模式',
+    Restoration: '艾泽拉斯复兴',
+    Timeways: '穿越时间流',
+    'Day of Rebirth': '重生之日',
+    'Emerald Dream': '漫游翡翠梦境',
+    Starcraft: '星际争霸',
+    'Great Dark Beyond': '深暗领域',
+    'Year of the Wolf': '狼年',
+    'Year of the Pegasus': '天马年',
+    'Lost City': '安戈洛龟途',
+    Embers: '世界之树的余烬',
+    'Bronze-Platinum': '青铜至白金',
+    Unknown: '未知',
+    'Order By': '排序方式',
+    'Opponent Archetype': '对手套牌类型',
+    'Opponent Archetypes': '对手套牌类型',
+    'As Class': '按玩家职业',
+    'Vs Class': '按对手职业',
+    'Exclude Bugged Deck Tracker Versions': '排除异常的套牌追踪器版本',
+    'No decks available for these filters. Maybe try changing one of the highlighted ones?':
+      '当前筛选条件下没有可用套牌，请尝试调整高亮的筛选项。',
+    'Any Opponent': '任意对手',
+    'In Mulligan': '起手出现',
+    'Not In Mulligan': '起手未出现',
+    Drawn: '已抽到',
+    'Not Drawn': '未抽到',
+    Kept: '已留下',
+    'Not Kept': '未留下',
+    'Class Stats': '职业数据',
+    'Win-Loss': '胜负',
+    Win: '胜利',
+    Loss: '失败',
+    Draw: '平局',
+    'Loading replays...': '正在加载对局回放…',
+    'Search opponent': '搜索对手',
+    'Create Group': '创建群组',
+    View: '查看',
+    'No Collection': '暂无收藏数据',
+    'You dont have a current collection': '你当前没有收藏数据',
+    'Use Firestone': '使用 Firestone',
+    'to sync your collections (you need to enable it in settings under third party)':
+      '同步你的收藏（需要在设置的第三方选项中启用）',
+  };
+
+  for (const [english, chinese] of Object.entries(expected)) {
+    assert.equal(translateText(english, siteDictionary), chinese);
+  }
+});
+
+test('translates leaderboard pages and filters', () => {
+  const expected: Readonly<Record<string, string>> = {
+    'Leaderboard Stats': '排行榜数据',
+    'HSEsports Leaderboards Points': '炉石电竞排行榜积分',
+    'Ladder Leaderboard': '天梯排行榜',
+    'Points Season': '积分赛季',
+    'Use Current Season': '使用当前赛季',
+    'Filter Countries': '筛选国家或地区',
+    Country: '国家或地区',
+    Regions: '赛区',
+    'Show Country Flags': '显示国家旗帜',
+    'Show country flags': '显示国家旗帜',
+    'Hide country flags': '隐藏国家旗帜',
+    'Include Unknown': '包含未知赛区',
+    "Don't Include Unknown": '不包含未知赛区',
+    Player: '玩家',
+    Best: '最佳排名',
+    'Average Finish': '平均完赛名次',
+    'Total Finishes': '完赛总次数',
+    Position: '排名',
+    Battletag: '战网昵称',
+    history: '历史记录',
+    'Updated at': '更新时间',
+    'BGs LL/Monthly': '酒馆战棋排行榜/月度数据',
+    January: '一月',
+    August: '八月',
+  };
+
+  for (const [english, chinese] of Object.entries(expected)) {
+    assert.equal(translateText(english, siteDictionary), chinese);
+  }
+
+  assert.equal(
+    translateText('Min 5 Finishes', siteDictionary),
+    '至少完赛 5 次',
+  );
+  assert.equal(translateText('Top 200↑', siteDictionary), '前 200 名↑');
+  assert.equal(
+    translateText('Total Players: 7,377', siteDictionary),
+    '玩家总数：7,377',
+  );
+  assert.equal(translateText('2026 Standard', siteDictionary), '2026 标准模式');
+  assert.equal(
+    translateText('2026 Announcement', siteDictionary),
+    '2026 年公告',
+  );
+  assert.equal(translateText('2025 Spring', siteDictionary), '2025 年春季');
+  assert.equal(
+    translateText('China 2026 Summer', siteDictionary),
+    '中国 2026 年夏季',
+  );
+  assert.equal(
+    translateText('2025 Last Chance', siteDictionary),
+    '2025 年最终资格赛',
+  );
+});
+
+test('translates profile settings and ISO country options', () => {
+  const expected: Readonly<Record<string, string>> = {
+    'Profile & Settings': '个人资料与设置',
+    'Country & Icon': '国家与图标',
+    'Country Flag': '国家旗帜',
+    'Select Country': '选择国家或地区',
+    'Cross Out Country': '划掉国家旗帜',
+    'Show Region Instead of Country': '显示赛区而非国家',
+    'Player Icon': '玩家图标',
+    'None/Custom': '无/自定义',
+    'For custom icons see patreon': '自定义图标请参阅 Patreon',
+    'For custom icons see': '自定义图标请参阅',
+    'Decklist Colors': '套牌列表颜色',
+    'Border Color': '边框颜色',
+    'Card Class': '卡牌职业',
+    'Deck Class': '套牌职业',
+    Rarity: '稀有度',
+    'Dark Grey': '深灰色',
+    'Deck Format': '套牌模式',
+    'Gradient Color': '渐变颜色',
+    'Decklist Options': '套牌列表选项',
+    'Preferred Deckcode When Copying': '复制时首选的套牌代码格式',
+    'Short Deckcode': '短套牌代码',
+    'Short Deckcode With Name': '带名称的短套牌代码',
+    'Long Deckcode': '长套牌代码',
+    'Long Deckcode using ###': '使用 ### 的长套牌代码',
+    'Long Deckcode (Invalid - Markdown Code)':
+      '长套牌代码（无效的 Markdown 代码）',
+    'Show 1 for singleton cards': '单张卡牌显示数量 1',
+    'Show 1 for singleton legendaries': '单张传说卡牌显示数量 1',
+    'Show dust+action bar above cards': '在卡牌上方显示奥术之尘与操作栏',
+    'Show dust+action bar below cards': '在卡牌下方显示奥术之尘与操作栏',
+    'Use missing dust instead of total': '显示缺少的奥术之尘而非总量',
+    'Fade missing cards in decks': '淡化套牌中缺少的卡牌',
+    'Fade rotating cards in decks': '淡化套牌中即将退环境的卡牌',
+    'Default Sheet': '默认套牌表',
+    'Default Source': '默认来源',
+    'Winrate/Impact Colors': '胜率/影响值颜色',
+    'Positive Color': '正值颜色',
+    'Negative Color': '负值颜色',
+    'Use Custom Hues': '使用自定义色相',
+    'Twitch Integration': 'Twitch 集成',
+    'Stream tracks automatically when connected.': '连接后自动追踪直播。',
+    'Connect Twitch': '连接 Twitch',
+    'Patreon Integration': 'Patreon 集成',
+    'Link your account to unlock perks.': '关联账号以解锁权益。',
+    'Connect Patreon': '连接 Patreon',
+    'Misc Settings': '其他设置',
+    'Current Collection': '当前收藏',
+    'Which replays do you want to be public? (Only affects new replays)':
+      '哪些对局回放可以公开？（仅影响新回放）',
+    Streamed: '已直播',
+    "Battlefy Slug (Open your profile, paste the URL, and I'll grab it)":
+      'Battlefy 标识（打开你的个人资料，粘贴网址即可自动提取）',
+  };
+
+  for (const [english, chinese] of Object.entries(expected)) {
+    assert.equal(translateText(english, siteDictionary), chinese);
+  }
+
+  assert.equal(
+    translateCountryOption('United States of America', 'US'),
+    '美国',
+  );
+  assert.equal(translateCountryOption('  Japan\n', 'JP'), '  日本\n');
+  assert.equal(
+    translateCountryOption('Unknown country', 'invalid'),
+    'Unknown country',
+  );
+  assert.equal(
+    translateText('Connections (0/2)', siteDictionary),
+    '连接（0/2）',
+  );
+  assert.equal(
+    translateText('Tier: Gold | Ad Free: Yes', siteDictionary),
+    '等级：Gold | 无广告：Yes',
+  );
 });
 
 test('preserves surrounding whitespace', () => {
@@ -168,6 +426,8 @@ test('translates the Standard, Wild, and Brawl meta page controls', () => {
   const expected: Readonly<Record<string, string>> = {
     Meta: '环境',
     'Stats Explanation': '数据说明',
+    'Aggregated Data': '聚合数据',
+    'Fresh Data': '最新数据',
     'To contribute use': '贡献数据请使用',
     'or the': '或',
     Chart: '图表',

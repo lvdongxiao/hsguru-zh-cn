@@ -27,6 +27,31 @@ test('translates current HSGuru shorthand names', () => {
   assert.equal(translateDeckName('Animancer Warlock'), '大哥术');
 });
 
+test('translates deck names from the signed-in homepage', () => {
+  assert.equal(translateDeckName('Attack Druid'), '攻击德');
+  assert.equal(translateDeckName("BUU Thal'ena DK"), '血邪邪萨安娜DK');
+  assert.equal(translateDeckName('BUU Bwonsamdi DK'), '血邪邪邦桑迪DK');
+});
+
+test('translates archetypes in signed-in filter dropdowns', () => {
+  assert.equal(translateDeckName('Quest DK'), '任务DK');
+  assert.equal(translateDeckName('Harold DK'), '兆示DK');
+  assert.equal(translateDeckName('Egg DK'), '蛋DK');
+  assert.equal(translateDeckName('Aggro DK'), '快攻DK');
+  assert.equal(translateDeckName('Frost DK'), '冰霜DK');
+  assert.equal(translateDeckName('Quest DH'), '任务瞎');
+  assert.equal(translateDeckName('Void Soul DH'), '虚空灵魂瞎');
+});
+
+test('translates current environment page archetypes', () => {
+  assert.equal(translateDeckName('Azshara Druid'), '艾萨拉德');
+  assert.equal(translateDeckName('End of Turnadin'), '回合结束骑');
+  assert.equal(translateDeckName('Barnes Druid'), '巴内斯德');
+  assert.equal(translateDeckName('Moragg Warlock'), '摩拉格术');
+  assert.equal(translateDeckName('Prepared Hunter'), '预备猎');
+  assert.equal(translateDeckName('Void DH'), '虚空瞎');
+});
+
 test('translates archetypes from the current Standard meta page', () => {
   assert.equal(translateDeckName('Unholy DK'), '邪DK');
   assert.equal(translateDeckName('Garona Rogue'), '迦罗娜贼');
