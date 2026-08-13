@@ -37,6 +37,16 @@
 
 ## 安装
 
+### 从 Greasy Fork 安装
+
+1. 安装 [Tampermonkey](https://www.tampermonkey.net/)；
+2. 打开 Greasy Fork 上的
+   [HSGuru 中文助手](https://greasyfork.org/zh-CN/scripts/590116-hsguru-%E4%B8%AD%E6%96%87%E5%8A%A9%E6%89%8B)；
+3. 点击“安装此脚本”，并在 Tampermonkey 中确认安装；
+4. 访问 HSGuru，然后刷新页面。
+
+通过 Greasy Fork 安装后，可以由 Tampermonkey 检查脚本更新。
+
 ### 从 GitHub Release 安装
 
 1. 安装 [Tampermonkey](https://www.tampermonkey.net/)；
@@ -121,19 +131,6 @@ scripts/build.mjs     # esbuild 用户脚本构建
 ```bash
 npm run check
 ```
-
-## GitHub 发布
-
-本项目通过版本标签触发自动发布。确认 `package.json` 中的版本号和标签一致后执行：
-
-```bash
-git tag v1.0.3
-git push origin v1.0.3
-```
-
-Release 工作流会执行完整检查、创建 GitHub Release，并上传 `hsguru-zh-cn.user.js`。
-
-GitHub Actions 构建时会根据当前仓库自动写入 `downloadURL` 和 `updateURL`，供 Tampermonkey 检查更新。
 
 ## 数据来源和声明
 
