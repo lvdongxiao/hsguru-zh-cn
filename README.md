@@ -127,8 +127,8 @@ npm run check
 本项目通过版本标签触发自动发布。确认 `package.json` 中的版本号和标签一致后执行：
 
 ```bash
-git tag v1.0.2
-git push origin v1.0.2
+git tag v1.0.3
+git push origin v1.0.3
 ```
 
 Release 工作流会执行完整检查、创建 GitHub Release，并上传 `hsguru-zh-cn.user.js`。
