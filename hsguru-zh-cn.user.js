@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         HSGuru 中文助手
 // @namespace    https://github.com/lvdongxiao/hsguru-zh-cn
-// @version      1.0.2
+// @version      1.0.3
 // @description  为 HSGuru 网站提供简体中文界面
 // @author       lvdongxiao
 // @homepageURL  https://github.com/lvdongxiao/hsguru-zh-cn
@@ -123,6 +123,7 @@
 
   // src/i18n/deck-names.ts
   var phraseTranslations = [
+    ["End of Turnadin", "回合结束骑"],
     ["Splendiferous Whizbang", "威兹班"],
     ["Astral Communion", "星界"],
     ["Rock 'n' Roll", "黑石摇滚"],
@@ -143,6 +144,7 @@
   var wordTranslations = {
     // 玩法与机制
     Face: "打脸",
+    Attack: "攻击",
     Aggro: "快攻",
     Alignment: "超凡",
     Amalgam: "融合怪",
@@ -203,6 +205,8 @@
     Taunt: "嘲讽",
     Treant: "树人",
     Warsong: "战歌",
+    Void: "虚空",
+    Prepared: "预备",
     // 种族、派系与法术派系
     Beast: "野兽",
     Mech: "机械",
@@ -253,6 +257,8 @@
     Tripwire: "绊索",
     Rafaam: "拉法姆",
     Rafaamlock: "拉法姆术",
+    "Thal'ena": "萨安娜",
+    Bwonsamdi: "邦桑迪",
     Malygos: "玛里苟斯",
     Merithra: "麦琳瑟拉",
     Shudderwock: "沙德沃克",
@@ -269,6 +275,8 @@
     Broxigar: "布洛克斯加",
     Gnoll: "豺狼人",
     Garona: "迦罗娜",
+    Azshara: "艾萨拉",
+    Barnes: "巴内斯",
     Godfrey: "高弗雷",
     "Il'gynoth": "伊格诺斯",
     Kingsbane: "弑君",
@@ -281,6 +289,7 @@
     "Sul'thraze": "苏萨斯",
     Switcheroo: "体型互换",
     Toki: "托奇",
+    Moragg: "摩拉格",
     Velarok: "威拉罗克"
   };
   var classSuffixes = [
@@ -364,6 +373,15 @@
     "placeholder",
     "title"
   ];
+  var deckNameDropdownNames = /* @__PURE__ */ new Set([
+    "Archetype",
+    "Archetypes",
+    "Deck Archetype",
+    "Opponent Archetype",
+    "Opponent Archetypes",
+    "套牌类型",
+    "对手套牌类型"
+  ]);
   function isDeckNameNode(node) {
     const element = node.parentElement;
     if (!element) return false;
@@ -380,7 +398,9 @@
     const dropdown = element.closest("div[x-data]");
     const dropdownTrigger = dropdown?.querySelector(":scope > a.button");
     const dropdownName = dropdownTrigger?.textContent?.trim();
-    if (dropdownName === "Archetypes" || dropdownName === "套牌类型") return true;
+    if (dropdownName && deckNameDropdownNames.has(dropdownName)) {
+      return true;
+    }
     const link = element.closest("a[href]");
     if (!link) return false;
     const href = link.getAttribute("href") ?? "";
@@ -405,7 +425,7 @@
   function translateDynamicText(content, dictionary2) {
     let match;
     if (match = content.match(/^(.+?)(\s*[↑↓])$/)) {
-      const translatedHeader = dictionary2[match[1]];
+      const translatedHeader = dictionary2[match[1]] ?? translateDynamicText(match[1], dictionary2);
       if (translatedHeader) return `${translatedHeader}${match[2]}`;
     }
     if (match = content.match(/^(.+?) (\d+)\/(\d+)( - DeckBuilder)?$/)) {
@@ -442,12 +462,39 @@
     if (match = content.match(/^Show ([\d,]+)$/)) {
       return `显示 ${match[1]} 条`;
     }
+    if (match = content.match(/^Min ([\d,]+) Finishes?$/)) {
+      return `至少完赛 ${match[1]} 次`;
+    }
     if (match = content.match(/^Min ([\d,]+)$/)) {
       return `至少 ${match[1]} 局`;
     }
     if (match = content.match(/^Top ([\d,]+)(k?)$/i)) {
       const value = Number(match[1].replaceAll(",", "")) * (match[2] ? 1e3 : 1);
       return `前 ${value.toLocaleString("zh-CN")} 名`;
+    }
+    if (match = content.match(/^Total Players: ([\d,]+)$/)) {
+      return `玩家总数：${match[1]}`;
+    }
+    if (match = content.match(/^(\d{4}) Standard$/)) {
+      return `${match[1]} 标准模式`;
+    }
+    if (match = content.match(/^(\d{4}) Announcement$/)) {
+      return `${match[1]} 年公告`;
+    }
+    if (match = content.match(
+      /^(?:(China) )?(\d{4}) (Spring|Summer|Fall|Winter)$/
+    )) {
+      const seasonNames = {
+        Spring: "春季",
+        Summer: "夏季",
+        Fall: "秋季",
+        Winter: "冬季"
+      };
+      const country = match[1] ? "中国 " : "";
+      return `${country}${match[2]} 年${seasonNames[match[3]]}`;
+    }
+    if (match = content.match(/^(\d{4}) Last Chance$/)) {
+      return `${match[1]} 年最终资格赛`;
     }
     if (match = content.match(/^Past (\d+) Hours?$/)) {
       return `过去 ${match[1]} 小时`;
@@ -497,11 +544,30 @@
     if (match = content.match(/^# Streamed: ([\d,]+)$/)) {
       return `直播次数：${match[1]}`;
     }
+    if (match = content.match(/^Connections \((\d+)\/(\d+)\)$/)) {
+      return `连接（${match[1]}/${match[2]}）`;
+    }
+    if (match = content.match(/^Tier: (.+?) \| Ad Free: (.+)$/)) {
+      return `等级：${match[1]} | 无广告：${match[2]}`;
+    }
     return void 0;
   }
   function replacePreservingWhitespace(source, replacement) {
     const match = source.match(/^(\s*)(.*?)(\s*)$/s);
     return match ? `${match[1]}${replacement}${match[3]}` : replacement;
+  }
+  var chineseRegionNames = typeof Intl.DisplayNames === "function" ? new Intl.DisplayNames(["zh-CN"], { type: "region" }) : void 0;
+  function translateCountryOption(source, countryCode) {
+    if (!chineseRegionNames || !/^[A-Z]{2}$/.test(countryCode)) return source;
+    const translated = chineseRegionNames.of(countryCode);
+    return translated && translated !== countryCode ? replacePreservingWhitespace(source, translated) : source;
+  }
+  function getCountryCodeFromElement(element) {
+    if (element instanceof HTMLOptionElement && element.parentElement?.matches('select[name="country_code"]')) {
+      return element.value;
+    }
+    const countryLabel = element.closest('label[for^="country["]');
+    return countryLabel?.getAttribute("for")?.match(/^country\[([A-Z]{2})\]$/)?.[1];
   }
   function translateText(source, dictionary2) {
     const match = source.match(/^(\s*)(.*?)(\s*)$/s);
@@ -598,6 +664,12 @@
       if (previous && node.data === previous.translated) return;
       const original = node.data;
       let translated = translateText(original, this.#dictionary);
+      if (translated === original) {
+        const countryCode = getCountryCodeFromElement(parent);
+        if (countryCode) {
+          translated = translateCountryOption(original, countryCode);
+        }
+      }
       if (translated === original && parent.matches(".card-name")) {
         const href = parent.closest('a[href*="/card/"]')?.getAttribute("href");
         if (href) {
@@ -1103,6 +1175,12 @@
     // 通用操作
     Home: "首页",
     Search: "搜索",
+    Submit: "提交",
+    New: "新建",
+    Delete: "删除",
+    View: "查看",
+    Share: "分享",
+    Use: "使用",
     Settings: "设置",
     Login: "登录",
     Logout: "退出登录",
@@ -1127,6 +1205,11 @@
     All: "全部",
     Any: "任意",
     Latest: "最新",
+    Default: "默认",
+    None: "无",
+    Blue: "蓝色",
+    Green: "绿色",
+    Red: "红色",
     "Privacy Policy": "隐私政策",
     "No ads & more": "无广告及更多权益",
     "Type or paste": "输入或粘贴",
@@ -1163,6 +1246,40 @@
     Leaderboards: "排行榜",
     "Player Stats": "玩家数据",
     "HSEsports Points": "炉石电竞积分",
+    "Leaderboard Stats": "排行榜数据",
+    "HSEsports Leaderboards Points": "炉石电竞排行榜积分",
+    "Ladder Leaderboard": "天梯排行榜",
+    "Points Season": "积分赛季",
+    "Use Current Season": "使用当前赛季",
+    "Filter Countries": "筛选国家或地区",
+    Country: "国家或地区",
+    Regions: "赛区",
+    "Show Country Flags": "显示国家旗帜",
+    "Show country flags": "显示国家旗帜",
+    "Hide country flags": "隐藏国家旗帜",
+    "Include Unknown": "包含未知赛区",
+    "Don't Include Unknown": "不包含未知赛区",
+    Player: "玩家",
+    Best: "最佳排名",
+    "Average Finish": "平均完赛名次",
+    "Total Finishes": "完赛总次数",
+    Position: "排名",
+    Battletag: "战网昵称",
+    history: "历史记录",
+    "Updated at": "更新时间",
+    "BGs LL/Monthly": "酒馆战棋排行榜/月度数据",
+    January: "一月",
+    February: "二月",
+    March: "三月",
+    April: "四月",
+    May: "五月",
+    June: "六月",
+    July: "七月",
+    August: "八月",
+    September: "九月",
+    October: "十月",
+    November: "十一月",
+    December: "十二月",
     Europe: "欧洲",
     Americas: "美洲",
     "Asia-Pacific": "亚太",
@@ -1200,6 +1317,131 @@
     "Chat Bot Hooks": "聊天机器人接口",
     "Discord Bot": "Discord 机器人",
     "HDT Plugin": "HDT 插件",
+    // 登录后的用户菜单
+    "Player Profile": "玩家资料",
+    "Deck Sheets": "套牌表",
+    "My Matchups": "我的对局",
+    "My Decks": "我的套牌",
+    "My Replays": "我的对局回放",
+    "My Groups": "我的群组",
+    Collection: "我的收藏",
+    // 登录后的玩家资料页
+    Leaderboard: "排行榜",
+    "Leaderboard Region": "排行榜赛区",
+    Battlegrounds: "酒馆战棋",
+    "Battlegrounds Duos": "酒馆战棋双打",
+    Mercenaries: "佣兵战纪",
+    "Legacy Arena": "传统竞技场",
+    "Underground Arena": "地下竞技场",
+    Competitions: "赛事",
+    Competition: "赛事",
+    Qualifiers: "资格赛",
+    MTs: "大师巡回赛",
+    Place: "名次",
+    Score: "积分",
+    // 登录后的套牌表与群组页
+    Owner: "所有者",
+    Group: "群组",
+    Actions: "操作",
+    "Create Group": "创建群组",
+    // 登录后的个人数据页
+    "Player: Deck Archetype": "玩家：套牌类型",
+    "Deck Archetype": "套牌类型",
+    "Opponent: Class": "对手：职业",
+    "Percentage %": "百分比 %",
+    "Preparing stats...": "正在准备数据…",
+    "Powered By": "数据来源：",
+    "Powered By Firestone": "数据由 Firestone 提供",
+    "Share your public decks": "分享你的公开套牌",
+    "Share your public replays": "分享你的公开对局回放",
+    "All Formats": "全部模式",
+    Restoration: "艾泽拉斯复兴",
+    Timeways: "穿越时间流",
+    "Day of Rebirth": "重生之日",
+    "Emerald Dream": "漫游翡翠梦境",
+    Starcraft: "星际争霸",
+    "Great Dark Beyond": "深暗领域",
+    "Year of the Wolf": "狼年",
+    "Year of the Pegasus": "天马年",
+    "Lost City": "安戈洛龟途",
+    Embers: "世界之树的余烬",
+    "Bronze-Platinum": "青铜至白金",
+    Unknown: "未知",
+    "Order By": "排序方式",
+    "Opponent Archetype": "对手套牌类型",
+    "Opponent Archetypes": "对手套牌类型",
+    "As Class": "按玩家职业",
+    "Vs Class": "按对手职业",
+    "Exclude Bugged Deck Tracker Versions": "排除异常的套牌追踪器版本",
+    "No decks available for these filters. Maybe try changing one of the highlighted ones?": "当前筛选条件下没有可用套牌，请尝试调整高亮的筛选项。",
+    "Any Opponent": "任意对手",
+    "In Mulligan": "起手出现",
+    "Not In Mulligan": "起手未出现",
+    Drawn: "已抽到",
+    "Not Drawn": "未抽到",
+    Kept: "已留下",
+    "Not Kept": "未留下",
+    "Class Stats": "职业数据",
+    "Win-Loss": "胜负",
+    Win: "胜利",
+    Loss: "失败",
+    Draw: "平局",
+    "Loading replays...": "正在加载对局回放…",
+    "Search opponent": "搜索对手",
+    "No Collection": "暂无收藏数据",
+    "You dont have a current collection": "你当前没有收藏数据",
+    "Use Firestone": "使用 Firestone",
+    "to sync your collections (you need to enable it in settings under third party)": "同步你的收藏（需要在设置的第三方选项中启用）",
+    // 登录后的个人设置页
+    "Profile & Settings": "个人资料与设置",
+    "Country & Icon": "国家与图标",
+    "Country Flag": "国家旗帜",
+    "Select Country": "选择国家或地区",
+    "Cross Out Country": "划掉国家旗帜",
+    "Show Region Instead of Country": "显示赛区而非国家",
+    "Player Icon": "玩家图标",
+    "None/Custom": "无/自定义",
+    "For custom icons see": "自定义图标请参阅",
+    "For custom icons see patreon": "自定义图标请参阅 Patreon",
+    "Decklist Colors": "套牌列表颜色",
+    "Border Color": "边框颜色",
+    "Card Class": "卡牌职业",
+    "Deck Class": "套牌职业",
+    Rarity: "稀有度",
+    "Dark Grey": "深灰色",
+    "Deck Format": "套牌模式",
+    "Gradient Color": "渐变颜色",
+    "Decklist Options": "套牌列表选项",
+    "Preferred Deckcode When Copying": "复制时首选的套牌代码格式",
+    "Short Deckcode": "短套牌代码",
+    "Short Deckcode With Name": "带名称的短套牌代码",
+    "Long Deckcode": "长套牌代码",
+    "Long Deckcode using ###": "使用 ### 的长套牌代码",
+    "Long Deckcode (Invalid - Markdown Code)": "长套牌代码（无效的 Markdown 代码）",
+    "Show 1 for singleton cards": "单张卡牌显示数量 1",
+    "Show 1 for singleton legendaries": "单张传说卡牌显示数量 1",
+    "Show dust+action bar above cards": "在卡牌上方显示奥术之尘与操作栏",
+    "Show dust+action bar below cards": "在卡牌下方显示奥术之尘与操作栏",
+    "Use missing dust instead of total": "显示缺少的奥术之尘而非总量",
+    "Fade missing cards in decks": "淡化套牌中缺少的卡牌",
+    "Fade rotating cards in decks": "淡化套牌中即将退环境的卡牌",
+    "Default Sheet": "默认套牌表",
+    "Default Source": "默认来源",
+    "Winrate/Impact Colors": "胜率/影响值颜色",
+    "Positive Color": "正值颜色",
+    "Negative Color": "负值颜色",
+    "Use Custom Hues": "使用自定义色相",
+    "Twitch Integration": "Twitch 集成",
+    "Stream tracks automatically when connected.": "连接后自动追踪直播。",
+    "Connect Twitch": "连接 Twitch",
+    "Patreon Integration": "Patreon 集成",
+    "Link your account to unlock perks.": "关联账号以解锁权益。",
+    "Connect Patreon": "连接 Patreon",
+    "Misc Settings": "其他设置",
+    "Current Collection": "当前收藏",
+    "Which replays do you want to be public? (Only affects new replays)": "哪些对局回放可以公开？（仅影响新回放）",
+    Streamed: "已直播",
+    "Battlefy Slug (Open your profile, paste the URL, and I'll grab it)": "Battlefy 标识（打开你的个人资料，粘贴网址即可自动提取）",
     // 模式、职业和排名
     Format: "模式",
     Standard: "标准模式",
@@ -1250,6 +1492,8 @@
     "Deck Name": "套牌名称",
     "Deck Type": "套牌类型",
     "Stats Explanation": "数据说明",
+    "Aggregated Data": "聚合数据",
+    "Fresh Data": "最新数据",
     "To contribute use": "贡献数据请使用",
     "or the": "或",
     Chart: "图表",
