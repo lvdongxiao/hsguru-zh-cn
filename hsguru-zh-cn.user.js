@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         HSGuru 中文助手
 // @namespace    https://github.com/lvdongxiao/hsguru-zh-cn
-// @version      1.0.4
+// @version      1.0.5
 // @description  为 HSGuru 网站提供简体中文界面
 // @author       lvdongxiao
 // @homepageURL  https://github.com/lvdongxiao/hsguru-zh-cn
@@ -139,6 +139,14 @@
     ["Tick Tock", "新任务"],
     ["Huddle Up", "抱团"],
     ["Alternate Reality", "平行现实"],
+    ["Jade Lotus", "青玉莲"],
+    ["Grimy Goons", "污手党"],
+    ["No Hand", "空手"],
+    ["Rat Trap", "捕鼠"],
+    ["Sea Shanty", "海上船歌"],
+    ["Small Spell", "小法术"],
+    ["Spell Damage", "法强"],
+    ["Star Grazer", "吞星兽"],
     ["6 7", "六七费"]
   ];
   var wordTranslations = {
@@ -207,6 +215,72 @@
     Warsong: "战歌",
     Void: "虚空",
     Prepared: "预备",
+    Archmage: "大法师",
+    Cycle: "过牌",
+    Dino: "恐龙",
+    Dude: "报告",
+    Enrage: "激怒",
+    Gladiator: "角斗",
+    Masochist: "受虐",
+    Patron: "奴隶",
+    Peddler: "精魂",
+    Rotten: "烂苹果",
+    Sanctum: "圣地",
+    Securitybot: "安保机器人",
+    Stego: "剑龙",
+    "Bot?": "机器人？",
+    "J-Lock": "大王控制术",
+    "Loh-cky": "洛奇",
+    Painlock: "自残术",
+    Tauntlock: "嘲讽术",
+    Astral: "星界",
+    AtT: "穿越时间流",
+    Basher: "怒袭甲龙",
+    Blaze: "毁灭之焰",
+    Boar: "野猪",
+    Burnlock: "直伤术",
+    Buttons: "扣子",
+    Chad: "大哥",
+    Colifero: "可丽菲罗",
+    Concierge: "礼宾",
+    Curselock: "诅咒术",
+    DMH: "亡者之牌",
+    Drilling: "发掘",
+    Dungar: "杜加尔",
+    Evolve: "异变",
+    Floppy: "软软多头蛇",
+    Gaia: "盖亚",
+    Garrote: "锁喉",
+    Gauntlet: "源生护手",
+    Giants: "巨人",
+    Hooktusk: "钩牙",
+    Hydration: "补水",
+    Insanity: "疲劳",
+    Jade: "青玉",
+    Kabal: "暗金教",
+    LPG: "口袋银河",
+    "Mecha'Chad": "机械大哥",
+    Mine: "水雷",
+    Miner: "矿工",
+    "Mug'Zee": "穆格·兹伊",
+    Murmur: "摩摩尔",
+    Nazmani: "纳兹曼尼",
+    Ogre: "食人魔",
+    Old: "旧版",
+    Other: "其他",
+    Overheal: "过疗",
+    Quilboar: "野猪人",
+    Relic: "圣物",
+    Rez: "复活",
+    Shark: "鲨鱼",
+    Sif: "西芙",
+    Sludge: "淤泥",
+    Swiftscale: "迅鳞",
+    Tentacle: "触须",
+    Therazane: "塞拉赞恩",
+    Toglock: "托瓦格尔术",
+    Totem: "图腾",
+    Well: "许愿井",
     // 种族、派系与法术派系
     Beast: "野兽",
     Mech: "机械",
@@ -290,7 +364,29 @@
     Switcheroo: "体型互换",
     Toki: "托奇",
     Moragg: "摩拉格",
-    Velarok: "威拉罗克"
+    Velarok: "威拉罗克",
+    Ashamane: "阿莎曼",
+    Briarspawn: "棘嗣幼龙",
+    Bwomsamdi: "邦桑迪",
+    Divergence: "裂解",
+    Elise: "伊莉斯",
+    Finja: "芬杰",
+    Fyrakk: "火龙",
+    Herenn: "赫雷恩",
+    Krona: "克洛纳",
+    Magmaw: "熔喉",
+    Maiev: "玛维",
+    Medivh: "麦迪文",
+    Murozond: "姆诺兹多",
+    Raza: "拉兹",
+    Toru: "托鲁",
+    Tyrande: "泰兰德",
+    Vyranoth: "威拉诺兹",
+    Wallow: "瓦洛",
+    Wilted: "枯萎",
+    Wo: "沃",
+    Ysondre: "伊森德雷",
+    Zuramat: "祖拉玛特"
   };
   var classSuffixes = [
     ["Demon Hunter", "瞎"],
@@ -443,6 +539,11 @@
       const statsType = match[2] === "Deck" ? "套牌" : "套牌类型";
       const format = dictionary2[match[3]];
       if (format) return `${deckName}${statsType}卡牌数据（${format}）`;
+    }
+    if (match = content.match(/^(.+?) (Standard|Wild|Brawl|Classic|Twist) stats$/)) {
+      const deckName = translateDeckName(match[1]);
+      const format = dictionary2[match[2]];
+      if (deckName !== match[1] && format) return `${deckName}（${format}）数据`;
     }
     if (match = content.match(/^(.+?) - (Standard|Wild)$/)) {
       const classAliases = {
@@ -1183,7 +1284,9 @@
     Use: "使用",
     Settings: "设置",
     Login: "登录",
+    "Log in": "登录",
     Logout: "退出登录",
+    "You need to log in to view this page": "你需要登录才能查看此页面",
     "Sign in (Battlenet)": "使用战网登录",
     Previous: "上一页",
     Next: "下一页",
@@ -1203,6 +1306,7 @@
     Yes: "是",
     No: "否",
     All: "全部",
+    "Select All": "全选",
     Any: "任意",
     Latest: "最新",
     Default: "默认",
@@ -1321,10 +1425,12 @@
     "Player Profile": "玩家资料",
     "Deck Sheets": "套牌表",
     "My Matchups": "我的对局",
+    "My Games": "我的对局",
     "My Decks": "我的套牌",
     "My Replays": "我的对局回放",
     "My Groups": "我的群组",
     Collection: "我的收藏",
+    "All Players": "所有玩家",
     // 登录后的玩家资料页
     Leaderboard: "排行榜",
     "Leaderboard Region": "排行榜赛区",
@@ -1517,6 +1623,7 @@
     "Kept Impact": "留牌影响",
     "Archetype Stats": "套牌类型数据",
     "Archetype Replays": "套牌类型对局回放",
+    "Replays Stats": "对局回放数据",
     Stats: "数据",
     "Coin?": "先后手",
     "Opponent's Class": "对手职业",
