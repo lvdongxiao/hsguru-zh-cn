@@ -39,6 +39,7 @@ export const dictionary: Readonly<Record<string, string>> = {
   Yes: '是',
   No: '否',
   All: '全部',
+  'Select All': '全选',
   Any: '任意',
   Latest: '最新',
   Default: '默认',
@@ -160,10 +161,12 @@ export const dictionary: Readonly<Record<string, string>> = {
   'Player Profile': '玩家资料',
   'Deck Sheets': '套牌表',
   'My Matchups': '我的对局',
+  'My Games': '我的对局',
   'My Decks': '我的套牌',
   'My Replays': '我的对局回放',
   'My Groups': '我的群组',
   Collection: '我的收藏',
+  'All Players': '所有玩家',
 
   // 登录后的玩家资料页
   Leaderboard: '排行榜',
@@ -368,6 +371,7 @@ export const dictionary: Readonly<Record<string, string>> = {
   'Kept Impact': '留牌影响',
   'Archetype Stats': '套牌类型数据',
   'Archetype Replays': '套牌类型对局回放',
+  'Replays Stats': '对局回放数据',
   Stats: '数据',
   'Coin?': '先后手',
   "Opponent's Class": '对手职业',

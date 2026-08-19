@@ -110,6 +110,13 @@ function translateDynamicText(
     const format = dictionary[match[3]];
     if (format) return `${deckName}${statsType}卡牌数据（${format}）`;
   }
+  if (
+    (match = content.match(/^(.+?) (Standard|Wild|Brawl|Classic|Twist) stats$/))
+  ) {
+    const deckName = translateDeckName(match[1]);
+    const format = dictionary[match[2]];
+    if (deckName !== match[1] && format) return `${deckName}（${format}）数据`;
+  }
   if ((match = content.match(/^(.+?) - (Standard|Wild)$/))) {
     const classAliases: Readonly<Record<string, string>> = {
       DK: 'Death Knight',

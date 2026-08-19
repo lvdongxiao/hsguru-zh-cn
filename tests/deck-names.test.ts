@@ -61,6 +61,60 @@ test('translates archetypes from the current Standard meta page', () => {
   assert.equal(translateDeckName('Toki Mage'), '托奇法');
 });
 
+test('translates the current Standard deck archetype dropdown', () => {
+  const expected: Readonly<Record<string, string>> = {
+    'Archmage DH': '大法师瞎',
+    'Ashamane Rogue': '阿莎曼贼',
+    'Bot? DK': '机器人？DK',
+    'Briarspawn Warrior': '棘嗣幼龙战',
+    'Bwomsamdi DK': '邦桑迪DK',
+    'CaprioDi Warrior': 'CaprioDi战',
+    'Cycle Rogue': '过牌贼',
+    'Dino Egglock': '恐龙蛋术',
+    'Divergence Warlock': '裂解术',
+    'Dude Paladin': '报告骑',
+    'Elise DH': '伊莉斯瞎',
+    'Enrage Warrior': '激怒战',
+    'Finja Paladin': '芬杰骑',
+    'Fyrakk Rogue': '火龙贼',
+    'Gladiator Warrior': '角斗战',
+    'Herenn DK': '赫雷恩DK',
+    'Jade Lotus Warrior': '青玉莲战',
+    'J-Lock': '大王控制术',
+    'Krona Druid': '克洛纳德',
+    'Loh-cky Druid': '洛奇德',
+    'Magmaw Hunter': '熔喉猎',
+    'Maiev Paladin': '玛维骑',
+    'Masochist Shaman': '受虐萨',
+    'Medivh Priest': '麦迪文牧',
+    'Murozond DH': '姆诺兹多瞎',
+    Painlock: '自残术',
+    'Patron Warrior': '奴隶战',
+    'Peddler Paladin': '精魂骑',
+    'Rat Trap Hunter': '捕鼠猎',
+    'Raza DH': '拉兹瞎',
+    'Rotten Druid': '烂苹果德',
+    'Sanctum Priest': '圣地牧',
+    'Securitybot Shaman': '安保机器人萨',
+    'Spell Damage Shaman': '法强萨',
+    'Stego Herenn DK': '剑龙赫雷恩DK',
+    Tauntlock: '嘲讽术',
+    'Toru DH': '托鲁瞎',
+    'Tyrande Priest': '泰兰德牧',
+    'Vyranoth Mage': '威拉诺兹法',
+    'Wallow Shredslock': '瓦洛撕裂术',
+    'Wallow Warlock': '瓦洛术',
+    'Wilted Priest': '枯萎牧',
+    'Wo Shaman': '沃萨',
+    'Ysondre Warrior': '伊森德雷战',
+    'Zuramat Druid': '祖拉玛特德',
+  };
+
+  for (const [english, chinese] of Object.entries(expected)) {
+    assert.equal(translateDeckName(english), chinese);
+  }
+});
+
 test('translates deck roots sampled across Standard, Wild, and Brawl', () => {
   assert.equal(
     translateDeckName('STD Contraband Face Hunter'),
@@ -99,6 +153,69 @@ test('covers the Wild 30-day, 50-game sample while preserving XL', () => {
   assert.equal(translateDeckName('Kingslayer Pirate Rogue'), '弑君海盗贼');
   assert.equal(translateDeckName('Automaton Priest'), '自动机牧');
   assert.equal(translateDeckName('XL FUU HL Plague DK'), 'XL冰邪邪宇宙瘟疫DK');
+});
+
+test('translates the current Wild deck archetype dropdown', () => {
+  const expected: Readonly<Record<string, string>> = {
+    'Astral Druid': '星界德',
+    'AtT Quest Hunter': '穿越时间流任务猎',
+    'Basher Warrior': '怒袭甲龙战',
+    'Blaze Warrior': '毁灭之焰战',
+    'Boar OTK Druid': '野猪OTK德',
+    Burnlock: '直伤术',
+    'Buttons DK': '扣子DK',
+    'Chad Seedlock': '大哥任务术',
+    'Colifero Demon Hunter': '可丽菲罗瞎',
+    'Concierge Paladin': '礼宾骑',
+    Curselock: '诅咒术',
+    'DMH Warrior': '亡者之牌战',
+    'Drilling Rogue': '发掘贼',
+    'Dungar Druid': '杜加尔德',
+    'Evolve Shaman': '异变萨',
+    'Floppy Hunter': '软软多头蛇猎',
+    'Gaia Paladin': '盖亚骑',
+    'Garrote Rogue': '锁喉贼',
+    'Gauntlet Warrior': '源生护手战',
+    'Giants Priest': '巨人牧',
+    'Grimy Goons Paladin': '污手党骑',
+    'Hooktusk Rogue': '钩牙贼',
+    'Hydration Warrior': '补水战',
+    'Insanity Warlock': '疲劳术',
+    'Jade Druid': '青玉德',
+    'Kabal Warlock': '暗金教术',
+    'LPG Mage': '口袋银河法',
+    "Mecha'Chad Warrior": '机械大哥战',
+    'Mine Rogue': '水雷贼',
+    'Clone Miner Paladin': '复制矿工骑',
+    "Mug'Zee Shaman": '穆格·兹伊萨',
+    'Murmur Shaman': '摩摩尔萨',
+    'Nazmani Priest': '纳兹曼尼牧',
+    'STD No Hand Hunter': '标准空手猎',
+    'Ogre Rogue': '食人魔贼',
+    'Old Aggro Druid': '旧版快攻德',
+    'Other Mage': '其他法',
+    'Overheal Priest': '过疗牧',
+    'Quilboar Demon Hunter': '野猪人瞎',
+    'Fel Relic DH': '邪能圣物瞎',
+    'Rez Priest': '复活牧',
+    'Sea Shanty Paladin': '海上船歌骑',
+    'Shark Rogue': '鲨鱼贼',
+    'Sif Mage': '西芙法',
+    'Sludge Warlock': '淤泥术',
+    'Small Spell Mage': '小法术法',
+    'Star Grazer Druid': '吞星兽德',
+    'Swiftscale Rogue': '迅鳞贼',
+    'Tentacle Mage': '触须法',
+    'Therazane Druid': '塞拉赞恩德',
+    Toglock: '托瓦格尔术',
+    'Totem Shaman': '图腾萨',
+    'Well Rogue': '许愿井贼',
+    'XL Sea Shanty Paladin': 'XL海上船歌骑',
+  };
+
+  for (const [english, chinese] of Object.entries(expected)) {
+    assert.equal(translateDeckName(english), chinese);
+  }
 });
 
 test('translates the initially visible Wild archetype filter options', () => {

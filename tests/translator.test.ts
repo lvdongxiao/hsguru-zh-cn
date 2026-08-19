@@ -23,6 +23,15 @@ test('translates the homepage input placeholder', () => {
   assert.equal(translateText('Type or paste', siteDictionary), '输入或粘贴');
 });
 
+test('translates the select-all dropdown option', () => {
+  assert.equal(translateText('Select All', siteDictionary), '全选');
+});
+
+test('translates player-scope dropdown options', () => {
+  assert.equal(translateText('All Players', siteDictionary), '所有玩家');
+  assert.equal(translateText('My Games', siteDictionary), '我的对局');
+});
+
 test('translates the signed-out player stats page', () => {
   assert.equal(
     translateText('You need to log in to view this page', siteDictionary),
@@ -605,6 +614,14 @@ test('translates deck detail page controls and statistics', () => {
   for (const [english, chinese] of Object.entries(expected)) {
     assert.equal(translateText(english, siteDictionary), chinese);
   }
+});
+
+test('translates archetype detail page headings and tabs', () => {
+  assert.equal(
+    translateText('Zee Shaman Standard stats', siteDictionary),
+    '随从萨（标准模式）数据',
+  );
+  assert.equal(translateText('Replays Stats', siteDictionary), '对局回放数据');
 });
 
 test('translates card detail page links, fields, and values', () => {
