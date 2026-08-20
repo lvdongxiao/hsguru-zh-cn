@@ -1,6 +1,6 @@
 {
   "name": "hsguru-zh-cn",
-  "version": "1.0.5",
+  "version": "1.1.0",
   "private": true,
   "description": "为 HSGuru 提供简体中文界面的 Tampermonkey 用户脚本",
   "type": "module",
