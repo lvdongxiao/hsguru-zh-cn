@@ -1,3 +1,5 @@
+import { getCardDbfIdFromHref } from './data/card-id';
+
 const renderBaseUrl =
   'https://art.hearthstonejson.com/v1/render/latest/zhCN/512x';
 
@@ -10,10 +12,6 @@ const localizedBackgroundAttribute =
 
 export function getChineseCardRenderUrl(renderId: string): string {
   return `${renderBaseUrl}/${encodeURIComponent(renderId)}.png`;
-}
-
-export function getCardDbfIdFromHref(href: string): string | undefined {
-  return href.match(/(?:^|\/)card\/(\d+)(?:[/?#]|$)/)?.[1];
 }
 
 function findCardImages(root: Node): HTMLImageElement[] {

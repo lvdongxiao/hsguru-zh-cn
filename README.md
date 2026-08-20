@@ -109,10 +109,11 @@ npm run check        # 类型、格式、测试和构建的完整检查
 ```text
 src/
 ├── data/             # HearthstoneJSON 加载、配对和缓存
-├── i18n/             # 界面词典、套牌名称和 DOM 翻译器
+├── i18n/             # 界面词典、动态规则、套牌名称和 DOM 翻译器
 ├── card-images.ts    # 中文卡图及悬停预览图
 ├── clipboard.ts      # 套牌复制与中文名称处理
-└── index.ts          # 菜单、页面观察和运行时入口
+├── runtime.ts        # 菜单、页面观察和运行时状态
+└── index.ts          # 用户脚本入口
 tests/                # Node.js 单元测试
 scripts/build.mjs     # esbuild 用户脚本构建
 ```
