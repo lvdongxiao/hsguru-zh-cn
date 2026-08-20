@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         HSGuru 中文助手
 // @namespace    https://github.com/lvdongxiao/hsguru-zh-cn
-// @version      1.0.5
+// @version      1.1.0
 // @description  为 HSGuru 网站提供简体中文界面
 // @author       lvdongxiao
 // @homepageURL  https://github.com/lvdongxiao/hsguru-zh-cn
@@ -25,6 +25,11 @@
 
 "use strict";
 (() => {
+  // src/data/card-id.ts
+  function getCardDbfIdFromHref(href) {
+    return href.match(/(?:^|\/)card\/(\d+)(?:[/?#]|$)/)?.[1];
+  }
+
   // src/card-images.ts
   var renderBaseUrl = "https://art.hearthstonejson.com/v1/render/latest/zhCN/512x";
   var originalSourceAttribute = "data-hsguru-zh-original-card-src";
@@ -33,9 +38,6 @@
   var localizedBackgroundAttribute = "data-hsguru-zh-localized-card-background-image";
   function getChineseCardRenderUrl(renderId) {
     return `${renderBaseUrl}/${encodeURIComponent(renderId)}.png`;
-  }
-  function getCardDbfIdFromHref(href) {
-    return href.match(/(?:^|\/)card\/(\d+)(?:[/?#]|$)/)?.[1];
   }
   function findCardImages(root) {
     const images = [];
@@ -454,70 +456,7 @@
     return translated && translated !== source.trim() ? translated : source;
   }
 
-  // src/i18n/translator.ts
-  var ignoredElementNames = /* @__PURE__ */ new Set([
-    "CODE",
-    "NOSCRIPT",
-    "PRE",
-    "SCRIPT",
-    "STYLE",
-    "TEXTAREA"
-  ]);
-  var translatableAttributes = [
-    "alt",
-    "aria-label",
-    "placeholder",
-    "title"
-  ];
-  var deckNameDropdownNames = /* @__PURE__ */ new Set([
-    "Archetype",
-    "Archetypes",
-    "Deck Archetype",
-    "Opponent Archetype",
-    "Opponent Archetypes",
-    "套牌类型",
-    "对手套牌类型"
-  ]);
-  function isDeckNameNode(node) {
-    const element = node.parentElement;
-    if (!element) return false;
-    if (element.closest(".deck-title, .archetype-name")) return true;
-    if (element.matches("main h1") && /^\/deck\/\d+/.test(window.location.pathname)) {
-      return true;
-    }
-    if (/^\/matchups\/?$/.test(window.location.pathname)) {
-      if (element.matches("table td.sticky-column")) return true;
-      if (element.matches('table th button[phx-value-sort_by^="opponent_"]')) {
-        return true;
-      }
-    }
-    const dropdown = element.closest("div[x-data]");
-    const dropdownTrigger = dropdown?.querySelector(":scope > a.button");
-    const dropdownName = dropdownTrigger?.textContent?.trim();
-    if (dropdownName && deckNameDropdownNames.has(dropdownName)) {
-      return true;
-    }
-    const link = element.closest("a[href]");
-    if (!link) return false;
-    const href = link.getAttribute("href") ?? "";
-    return /^(?:https:\/\/www\.hsguru\.com)?\/(?:deck\/\d+|archetype\/)/.test(
-      href
-    );
-  }
-  function getCardDetailField(element) {
-    if (!/^\/card\/\d+/.test(window.location.pathname)) return void 0;
-    if (element.matches("main h1")) return "name";
-    const cell = element.closest("td");
-    const row = cell?.parentElement;
-    const cells = row?.querySelectorAll(":scope > td");
-    if (!cell || !cells || cells[1] !== cell) return void 0;
-    const label = cells[0]?.textContent?.trim();
-    if (label === "Name" || label === "名称") return "name";
-    if (label === "Text" || label === "卡牌文本") return "text";
-    if (label === "Flavor Text" || label === "趣味描述") return "flavor";
-    if (label === "Keywords" || label === "关键词") return "keywords";
-    return void 0;
-  }
+  // src/i18n/dynamic-rules.ts
   function translateDynamicText(content, dictionary2) {
     let match;
     if (match = content.match(/^(.+?)(\s*[↑↓])$/)) {
@@ -653,6 +592,8 @@
     }
     return void 0;
   }
+
+  // src/i18n/text.ts
   function replacePreservingWhitespace(source, replacement) {
     const match = source.match(/^(\s*)(.*?)(\s*)$/s);
     return match ? `${match[1]}${replacement}${match[3]}` : replacement;
@@ -663,13 +604,6 @@
     const translated = chineseRegionNames.of(countryCode);
     return translated && translated !== countryCode ? replacePreservingWhitespace(source, translated) : source;
   }
-  function getCountryCodeFromElement(element) {
-    if (element instanceof HTMLOptionElement && element.parentElement?.matches('select[name="country_code"]')) {
-      return element.value;
-    }
-    const countryLabel = element.closest('label[for^="country["]');
-    return countryLabel?.getAttribute("for")?.match(/^country\[([A-Z]{2})\]$/)?.[1];
-  }
   function translateText(source, dictionary2) {
     const match = source.match(/^(\s*)(.*?)(\s*)$/s);
     if (!match) return source;
@@ -677,6 +611,8 @@
     const translated = dictionary2[content] ?? translateDynamicText(content, dictionary2);
     return translated === void 0 ? source : replacePreservingWhitespace(source, translated);
   }
+
+  // src/i18n/card-text.ts
   function translateCardTextByHref(source, href, namesByDbfId) {
     if (source.trim() === "") return source;
     const dbfId = getCardDbfIdFromHref(href);
@@ -703,20 +639,85 @@
     if (translated.some((keyword) => keyword === void 0)) return source;
     return `${match[1]}${translated.join("、")}${match[3]}`;
   }
+
+  // src/i18n/page-translator.ts
+  var ignoredElementNames = /* @__PURE__ */ new Set([
+    "CODE",
+    "NOSCRIPT",
+    "PRE",
+    "SCRIPT",
+    "STYLE",
+    "TEXTAREA"
+  ]);
+  var translatableAttributes = [
+    "alt",
+    "aria-label",
+    "placeholder",
+    "title"
+  ];
+  var deckNameDropdownNames = /* @__PURE__ */ new Set([
+    "Archetype",
+    "Archetypes",
+    "Deck Archetype",
+    "Opponent Archetype",
+    "Opponent Archetypes",
+    "套牌类型",
+    "对手套牌类型"
+  ]);
+  function isDeckNameNode(node) {
+    const element = node.parentElement;
+    if (!element) return false;
+    if (element.closest(".deck-title, .archetype-name")) return true;
+    if (element.matches("main h1") && /^\/deck\/\d+/.test(window.location.pathname)) {
+      return true;
+    }
+    if (/^\/matchups\/?$/.test(window.location.pathname)) {
+      if (element.matches("table td.sticky-column")) return true;
+      if (element.matches('table th button[phx-value-sort_by^="opponent_"]')) {
+        return true;
+      }
+    }
+    const dropdown = element.closest("div[x-data]");
+    const dropdownTrigger = dropdown?.querySelector(":scope > a.button");
+    const dropdownName = dropdownTrigger?.textContent?.trim();
+    if (dropdownName && deckNameDropdownNames.has(dropdownName)) return true;
+    const link = element.closest("a[href]");
+    if (!link) return false;
+    const href = link.getAttribute("href") ?? "";
+    return /^(?:https:\/\/www\.hsguru\.com)?\/(?:deck\/\d+|archetype\/)/.test(
+      href
+    );
+  }
+  function getCardDetailField(element) {
+    if (!/^\/card\/\d+/.test(window.location.pathname)) return void 0;
+    if (element.matches("main h1")) return "name";
+    const cell = element.closest("td");
+    const row = cell?.parentElement;
+    const cells = row?.querySelectorAll(":scope > td");
+    if (!cell || !cells || cells[1] !== cell) return void 0;
+    const label = cells[0]?.textContent?.trim();
+    if (label === "Name" || label === "名称") return "name";
+    if (label === "Text" || label === "卡牌文本") return "text";
+    if (label === "Flavor Text" || label === "趣味描述") return "flavor";
+    if (label === "Keywords" || label === "关键词") return "keywords";
+    return void 0;
+  }
+  function getCountryCodeFromElement(element) {
+    if (element instanceof HTMLOptionElement && element.parentElement?.matches('select[name="country_code"]')) {
+      return element.value;
+    }
+    const countryLabel = element.closest('label[for^="country["]');
+    return countryLabel?.getAttribute("for")?.match(/^country\[([A-Z]{2})\]$/)?.[1];
+  }
   var PageTranslator = class {
-    #dictionary;
-    #cardNamesByDbfId;
-    #cardTextsByDbfId;
-    #cardFlavorsByDbfId;
-    #cardKeywordDictionary;
+    #resources;
     #translatedText = /* @__PURE__ */ new WeakMap();
     #translatedAttributes = /* @__PURE__ */ new WeakMap();
-    constructor(dictionary2, cardNamesByDbfId2 = {}, cardTextsByDbfId2 = {}, cardFlavorsByDbfId2 = {}, cardKeywordDictionary2 = {}) {
-      this.#dictionary = dictionary2;
-      this.#cardNamesByDbfId = cardNamesByDbfId2;
-      this.#cardTextsByDbfId = cardTextsByDbfId2;
-      this.#cardFlavorsByDbfId = cardFlavorsByDbfId2;
-      this.#cardKeywordDictionary = cardKeywordDictionary2;
+    constructor(resources) {
+      this.#resources = resources;
+    }
+    replaceResources(resources) {
+      this.#resources = resources;
     }
     translate(root) {
       if (root instanceof Text) {
@@ -731,11 +732,9 @@
       );
       let current;
       while (current = walker.nextNode()) {
-        if (current instanceof Text) {
-          this.#translateTextNode(current);
-        } else if (current instanceof Element) {
+        if (current instanceof Text) this.#translateTextNode(current);
+        else if (current instanceof Element)
           this.#translateElementAttributes(current);
-        }
       }
     }
     restore(root) {
@@ -751,11 +750,9 @@
       );
       let current;
       while (current = walker.nextNode()) {
-        if (current instanceof Text) {
-          this.#restoreTextNode(current);
-        } else if (current instanceof Element) {
+        if (current instanceof Text) this.#restoreTextNode(current);
+        else if (current instanceof Element)
           this.#restoreElementAttributes(current);
-        }
       }
     }
     #translateTextNode(node) {
@@ -764,12 +761,12 @@
       const previous = this.#translatedText.get(node);
       if (previous && node.data === previous.translated) return;
       const original = node.data;
-      let translated = translateText(original, this.#dictionary);
+      const resources = this.#resources;
+      let translated = translateText(original, resources.dictionary);
       if (translated === original) {
         const countryCode = getCountryCodeFromElement(parent);
-        if (countryCode) {
+        if (countryCode)
           translated = translateCountryOption(original, countryCode);
-        }
       }
       if (translated === original && parent.matches(".card-name")) {
         const href = parent.closest('a[href*="/card/"]')?.getAttribute("href");
@@ -777,20 +774,20 @@
           translated = translateCardTextByHref(
             original,
             href,
-            this.#cardNamesByDbfId
+            resources.cardNamesByDbfId
           );
         }
       }
       if (translated === original) {
         const cardDetailField = getCardDetailField(parent);
         if (cardDetailField) {
-          translated = cardDetailField === "keywords" ? translateCardKeywords(original, this.#cardKeywordDictionary) : translateCardDetailTextByHref(
+          translated = cardDetailField === "keywords" ? translateCardKeywords(original, resources.cardKeywordDictionary) : translateCardDetailTextByHref(
             original,
             window.location.pathname,
             cardDetailField,
-            this.#cardNamesByDbfId,
-            this.#cardTextsByDbfId,
-            this.#cardFlavorsByDbfId
+            resources.cardNamesByDbfId,
+            resources.cardTextsByDbfId,
+            resources.cardFlavorsByDbfId
           );
         }
       }
@@ -816,14 +813,14 @@
         if (value === null) continue;
         const previous = this.#translatedAttributes.get(element)?.get(attribute);
         if (previous && value === previous.translated) continue;
-        let translated = translateText(value, this.#dictionary);
+        let translated = translateText(value, this.#resources.dictionary);
         if (translated === value && attribute === "alt") {
           const href = element.closest('a[href*="/card/"]')?.getAttribute("href");
           if (href) {
             translated = translateCardTextByHref(
               value,
               href,
-              this.#cardNamesByDbfId
+              this.#resources.cardNamesByDbfId
             );
           }
         }
@@ -863,7 +860,7 @@
   function isHsguruChart(context) {
     return Boolean(context.canvas?.closest?.('[phx-hook="ChartJs"]'));
   }
-  function installChartLabelTranslation(prototype, dictionary2, isEnabled2) {
+  function installChartLabelTranslation(prototype, dictionary2, isEnabled) {
     if (!prototype || installedPrototypes.has(prototype)) return false;
     installedPrototypes.add(prototype);
     const originalFillText = prototype.fillText;
@@ -871,7 +868,7 @@
     const originalStrokeText = prototype.strokeText;
     const localize = (context, text) => {
       const source = String(text);
-      return isEnabled2() && isHsguruChart(context) ? translateChartText(source, dictionary2) : source;
+      return isEnabled() && isHsguruChart(context) ? translateChartText(source, dictionary2) : source;
     };
     prototype.fillText = function(text, x, y, maxWidth) {
       const translated = localize(this, text);
@@ -923,6 +920,184 @@
       nudged += 1;
     }
     return nudged;
+  }
+
+  // src/clipboard.ts
+  var deckMarkerPattern = /^(?:# (?:Class|Format):|[A-Za-z0-9+/]{40,}={0,2})\r?$/m;
+  function translateCopiedDeckText(source) {
+    if (!deckMarkerPattern.test(source)) return source;
+    return source.replace(
+      /^(\uFEFF?[ \t]*###[ \t]+)(.*?)([ \t]*)(\r?)$/m,
+      (_line, prefix, deckName, trailing, cr) => `${prefix}${translateDeckName(deckName)}${trailing}${cr}`
+    );
+  }
+  function createHsguruDeckCopyText(deckName, deckCode, deckUrl) {
+    return [
+      `### ${translateDeckName(deckName)}`,
+      deckCode,
+      `### You can view this deck at ${deckUrl}`
+    ].join("\n");
+  }
+  function extractDeckCode(heading) {
+    const matches = heading.textContent?.match(/[A-Za-z0-9+/]{40,}={0,2}/g);
+    return matches?.sort((a, b) => b.length - a.length)[0];
+  }
+  function findDeckHeading(trigger) {
+    let ancestor = trigger.parentElement;
+    while (ancestor && ancestor !== document.body) {
+      const headings = [...ancestor.querySelectorAll("h2")].filter(
+        (heading) => Boolean(extractDeckCode(heading))
+      );
+      if (headings.length === 1) return headings[0];
+      if (headings.length > 1) break;
+      ancestor = ancestor.parentElement;
+    }
+    const triggerRect = trigger.getBoundingClientRect();
+    return [...document.querySelectorAll("main h2")].filter((heading) => Boolean(extractDeckCode(heading))).sort((a, b) => {
+      const distanceA = Math.abs(
+        a.getBoundingClientRect().top - triggerRect.top
+      );
+      const distanceB = Math.abs(
+        b.getBoundingClientRect().top - triggerRect.top
+      );
+      return distanceA - distanceB;
+    })[0];
+  }
+  function getDeckUrl(heading) {
+    const currentUrl = new URL(window.location.href);
+    const deckLink = heading.querySelector('a[href*="/deck/"]');
+    const candidate = new URL(deckLink?.href ?? currentUrl.href, currentUrl.href);
+    if (!/^\/deck\/\d+/.test(candidate.pathname)) return void 0;
+    return `${candidate.origin}${candidate.pathname}`;
+  }
+  function showCopiedFeedback(button) {
+    document.querySelector("[data-hsguru-zh-copy-feedback]")?.remove();
+    const originalLabel = button.dataset.hsguruZhOriginalCopyLabel ?? button.getAttribute("aria-label") ?? "";
+    const originalBalloonPosition = button.dataset.hsguruZhOriginalBalloonPosition ?? button.getAttribute("data-balloon-pos") ?? "";
+    button.dataset.hsguruZhCopyButton = "";
+    button.dataset.hsguruZhOriginalCopyLabel = originalLabel;
+    button.dataset.hsguruZhOriginalBalloonPosition = originalBalloonPosition;
+    button.setAttribute("aria-label", "已复制");
+    button.removeAttribute("data-balloon-pos");
+    const restoreLabel = () => {
+      if (originalLabel) button.setAttribute("aria-label", originalLabel);
+      else button.removeAttribute("aria-label");
+      if (originalBalloonPosition) {
+        button.setAttribute("data-balloon-pos", originalBalloonPosition);
+      } else {
+        button.removeAttribute("data-balloon-pos");
+      }
+      delete button.dataset.hsguruZhCopyButton;
+      delete button.dataset.hsguruZhOriginalCopyLabel;
+      delete button.dataset.hsguruZhOriginalBalloonPosition;
+    };
+    const restoreAfterPointerExit = () => {
+      button.blur();
+      window.requestAnimationFrame(() => {
+        window.requestAnimationFrame(restoreLabel);
+      });
+    };
+    button.addEventListener("pointerleave", restoreAfterPointerExit, {
+      once: true
+    });
+    const badge = document.createElement("span");
+    badge.dataset.hsguruZhCopyFeedback = "";
+    badge.setAttribute("role", "status");
+    badge.setAttribute("aria-live", "polite");
+    badge.textContent = "已复制";
+    const rect = button.getBoundingClientRect();
+    Object.assign(badge.style, {
+      position: "fixed",
+      zIndex: "2147483647",
+      left: `${rect.left + rect.width / 2}px`,
+      top: `${rect.top > 44 ? rect.top - 36 : rect.bottom + 8}px`,
+      transform: "translateX(-50%)",
+      padding: "6px 12px",
+      border: "0",
+      borderRadius: "2px",
+      background: "rgb(16 16 16 / 95%)",
+      color: "#ffffff",
+      fontSize: "12px",
+      lineHeight: "1.2",
+      boxShadow: "none",
+      pointerEvents: "none",
+      opacity: "0",
+      transition: "opacity 180ms ease-out 180ms"
+    });
+    document.body.append(badge);
+    window.requestAnimationFrame(() => {
+      badge.style.opacity = "1";
+    });
+    window.setTimeout(() => {
+      badge.style.opacity = "0";
+      if (!button.matches(":hover")) restoreAfterPointerExit();
+      window.setTimeout(() => badge.remove(), 140);
+    }, 1200);
+  }
+  function installDeckCopyButtonTranslation(isEnabled, setClipboard) {
+    document.addEventListener(
+      "click",
+      (event) => {
+        if (!isEnabled() || !(event.target instanceof Element)) return;
+        const clipboardTrigger = event.target.closest(
+          "[data-clipboard-text]"
+        );
+        const clipboardText = clipboardTrigger?.getAttribute(
+          "data-clipboard-text"
+        );
+        if (clipboardTrigger && clipboardText) {
+          const translated = translateCopiedDeckText(clipboardText);
+          if (translated !== clipboardText) {
+            event.preventDefault();
+            event.stopImmediatePropagation();
+            setClipboard(translated);
+            showCopiedFeedback(clipboardTrigger);
+            return;
+          }
+        }
+        const button = event.target.closest("button");
+        if (!button) return;
+        const label = button.getAttribute("aria-label")?.trim();
+        const text = button.textContent?.trim();
+        if (!button.hasAttribute("data-hsguru-zh-copy-button") && label !== "Copy" && label !== "复制" && text !== "Copy" && text !== "复制") {
+          return;
+        }
+        const heading = findDeckHeading(button);
+        const deckName = heading?.querySelector(
+          'a[href*="/deck/"], a[href*="/archetype/"]'
+        )?.textContent?.trim();
+        const deckCode = heading ? extractDeckCode(heading) : void 0;
+        const deckUrl = heading ? getDeckUrl(heading) : void 0;
+        if (!deckName || !deckCode || !deckUrl) return;
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        setClipboard(createHsguruDeckCopyText(deckName, deckCode, deckUrl));
+        showCopiedFeedback(button);
+      },
+      { capture: true }
+    );
+  }
+  function installDeckClipboardTranslation(clipboard, isEnabled) {
+    if (!clipboard || typeof clipboard.writeText !== "function") return false;
+    const prototype = Object.getPrototypeOf(clipboard);
+    const target = prototype && typeof prototype.writeText === "function" ? prototype : clipboard;
+    const originalWriteText = target.writeText;
+    const translatedWriteText = function(text) {
+      return originalWriteText.call(
+        this,
+        isEnabled() ? translateCopiedDeckText(text) : text
+      );
+    };
+    try {
+      Object.defineProperty(target, "writeText", {
+        configurable: true,
+        writable: true,
+        value: translatedWriteText
+      });
+      return true;
+    } catch {
+      return false;
+    }
   }
 
   // src/data/card-dictionary.ts
@@ -1090,184 +1265,6 @@
         };
       }
       throw error;
-    }
-  }
-
-  // src/clipboard.ts
-  var deckMarkerPattern = /^(?:# (?:Class|Format):|[A-Za-z0-9+/]{40,}={0,2})\r?$/m;
-  function translateCopiedDeckText(source) {
-    if (!deckMarkerPattern.test(source)) return source;
-    return source.replace(
-      /^(\uFEFF?[ \t]*###[ \t]+)(.*?)([ \t]*)(\r?)$/m,
-      (_line, prefix, deckName, trailing, cr) => `${prefix}${translateDeckName(deckName)}${trailing}${cr}`
-    );
-  }
-  function createHsguruDeckCopyText(deckName, deckCode, deckUrl) {
-    return [
-      `### ${translateDeckName(deckName)}`,
-      deckCode,
-      `### You can view this deck at ${deckUrl}`
-    ].join("\n");
-  }
-  function extractDeckCode(heading) {
-    const matches = heading.textContent?.match(/[A-Za-z0-9+/]{40,}={0,2}/g);
-    return matches?.sort((a, b) => b.length - a.length)[0];
-  }
-  function findDeckHeading(trigger) {
-    let ancestor = trigger.parentElement;
-    while (ancestor && ancestor !== document.body) {
-      const headings = [...ancestor.querySelectorAll("h2")].filter(
-        (heading) => Boolean(extractDeckCode(heading))
-      );
-      if (headings.length === 1) return headings[0];
-      if (headings.length > 1) break;
-      ancestor = ancestor.parentElement;
-    }
-    const triggerRect = trigger.getBoundingClientRect();
-    return [...document.querySelectorAll("main h2")].filter((heading) => Boolean(extractDeckCode(heading))).sort((a, b) => {
-      const distanceA = Math.abs(
-        a.getBoundingClientRect().top - triggerRect.top
-      );
-      const distanceB = Math.abs(
-        b.getBoundingClientRect().top - triggerRect.top
-      );
-      return distanceA - distanceB;
-    })[0];
-  }
-  function getDeckUrl(heading) {
-    const currentUrl = new URL(window.location.href);
-    const deckLink = heading.querySelector('a[href*="/deck/"]');
-    const candidate = new URL(deckLink?.href ?? currentUrl.href, currentUrl.href);
-    if (!/^\/deck\/\d+/.test(candidate.pathname)) return void 0;
-    return `${candidate.origin}${candidate.pathname}`;
-  }
-  function showCopiedFeedback(button) {
-    document.querySelector("[data-hsguru-zh-copy-feedback]")?.remove();
-    const originalLabel = button.dataset.hsguruZhOriginalCopyLabel ?? button.getAttribute("aria-label") ?? "";
-    const originalBalloonPosition = button.dataset.hsguruZhOriginalBalloonPosition ?? button.getAttribute("data-balloon-pos") ?? "";
-    button.dataset.hsguruZhCopyButton = "";
-    button.dataset.hsguruZhOriginalCopyLabel = originalLabel;
-    button.dataset.hsguruZhOriginalBalloonPosition = originalBalloonPosition;
-    button.setAttribute("aria-label", "已复制");
-    button.removeAttribute("data-balloon-pos");
-    const restoreLabel = () => {
-      if (originalLabel) button.setAttribute("aria-label", originalLabel);
-      else button.removeAttribute("aria-label");
-      if (originalBalloonPosition) {
-        button.setAttribute("data-balloon-pos", originalBalloonPosition);
-      } else {
-        button.removeAttribute("data-balloon-pos");
-      }
-      delete button.dataset.hsguruZhCopyButton;
-      delete button.dataset.hsguruZhOriginalCopyLabel;
-      delete button.dataset.hsguruZhOriginalBalloonPosition;
-    };
-    const restoreAfterPointerExit = () => {
-      button.blur();
-      window.requestAnimationFrame(() => {
-        window.requestAnimationFrame(restoreLabel);
-      });
-    };
-    button.addEventListener("pointerleave", restoreAfterPointerExit, {
-      once: true
-    });
-    const badge = document.createElement("span");
-    badge.dataset.hsguruZhCopyFeedback = "";
-    badge.setAttribute("role", "status");
-    badge.setAttribute("aria-live", "polite");
-    badge.textContent = "已复制";
-    const rect = button.getBoundingClientRect();
-    Object.assign(badge.style, {
-      position: "fixed",
-      zIndex: "2147483647",
-      left: `${rect.left + rect.width / 2}px`,
-      top: `${rect.top > 44 ? rect.top - 36 : rect.bottom + 8}px`,
-      transform: "translateX(-50%)",
-      padding: "6px 12px",
-      border: "0",
-      borderRadius: "2px",
-      background: "rgb(16 16 16 / 95%)",
-      color: "#ffffff",
-      fontSize: "12px",
-      lineHeight: "1.2",
-      boxShadow: "none",
-      pointerEvents: "none",
-      opacity: "0",
-      transition: "opacity 180ms ease-out 180ms"
-    });
-    document.body.append(badge);
-    window.requestAnimationFrame(() => {
-      badge.style.opacity = "1";
-    });
-    window.setTimeout(() => {
-      badge.style.opacity = "0";
-      if (!button.matches(":hover")) restoreAfterPointerExit();
-      window.setTimeout(() => badge.remove(), 140);
-    }, 1200);
-  }
-  function installDeckCopyButtonTranslation(isEnabled2, setClipboard) {
-    document.addEventListener(
-      "click",
-      (event) => {
-        if (!isEnabled2() || !(event.target instanceof Element)) return;
-        const clipboardTrigger = event.target.closest(
-          "[data-clipboard-text]"
-        );
-        const clipboardText = clipboardTrigger?.getAttribute(
-          "data-clipboard-text"
-        );
-        if (clipboardTrigger && clipboardText) {
-          const translated = translateCopiedDeckText(clipboardText);
-          if (translated !== clipboardText) {
-            event.preventDefault();
-            event.stopImmediatePropagation();
-            setClipboard(translated);
-            showCopiedFeedback(clipboardTrigger);
-            return;
-          }
-        }
-        const button = event.target.closest("button");
-        if (!button) return;
-        const label = button.getAttribute("aria-label")?.trim();
-        const text = button.textContent?.trim();
-        if (!button.hasAttribute("data-hsguru-zh-copy-button") && label !== "Copy" && label !== "复制" && text !== "Copy" && text !== "复制") {
-          return;
-        }
-        const heading = findDeckHeading(button);
-        const deckName = heading?.querySelector(
-          'a[href*="/deck/"], a[href*="/archetype/"]'
-        )?.textContent?.trim();
-        const deckCode = heading ? extractDeckCode(heading) : void 0;
-        const deckUrl = heading ? getDeckUrl(heading) : void 0;
-        if (!deckName || !deckCode || !deckUrl) return;
-        event.preventDefault();
-        event.stopImmediatePropagation();
-        setClipboard(createHsguruDeckCopyText(deckName, deckCode, deckUrl));
-        showCopiedFeedback(button);
-      },
-      { capture: true }
-    );
-  }
-  function installDeckClipboardTranslation(clipboard, isEnabled2) {
-    if (!clipboard || typeof clipboard.writeText !== "function") return false;
-    const prototype = Object.getPrototypeOf(clipboard);
-    const target = prototype && typeof prototype.writeText === "function" ? prototype : clipboard;
-    const originalWriteText = target.writeText;
-    const translatedWriteText = function(text) {
-      return originalWriteText.call(
-        this,
-        isEnabled2() ? translateCopiedDeckText(text) : text
-      );
-    };
-    try {
-      Object.defineProperty(target, "writeText", {
-        configurable: true,
-        writable: true,
-        value: translatedWriteText
-      });
-      return true;
-    } catch {
-      return false;
     }
   }
 
@@ -1765,190 +1762,216 @@
     "Curse of Naxxramas": "纳克萨玛斯的诅咒"
   };
 
-  // src/index.ts
-  var storageKey = "hsguru-zh-cn:enabled";
-  var runtimeDictionary = { ...dictionary };
-  var cardNamesByDbfId = {};
-  var cardTextsByDbfId = {};
-  var cardFlavorsByDbfId = {};
-  var cardKeywordDictionary = {};
-  var cardRenderIdsByDbfId = {};
-  var translator = new PageTranslator(
-    runtimeDictionary,
-    cardNamesByDbfId,
-    cardTextsByDbfId,
-    cardFlavorsByDbfId,
-    cardKeywordDictionary
-  );
-  var isEnabled = localStorage.getItem(storageKey) !== "false";
-  installChartLabelTranslation(
-    unsafeWindow.CanvasRenderingContext2D?.prototype,
-    dictionary,
-    () => isEnabled
-  );
-  var translationMenuId;
-  var updateCardsMenuId;
-  var isCardUpdateInProgress = false;
-  var isClipboardTranslationInstalled = installDeckClipboardTranslation(
-    unsafeWindow.navigator.clipboard,
-    () => isEnabled
-  );
-  installDeckCopyButtonTranslation(
-    () => isEnabled,
-    (text) => GM_setClipboard(text)
-  );
-  function translatePage() {
-    if (!isEnabled || !document.documentElement) return;
-    document.documentElement.lang = "zh-CN";
-    translator.translate(document.documentElement);
-    localizeCardImages(document.documentElement, cardRenderIdsByDbfId);
-  }
-  function replaceRecord(target, source) {
-    for (const key of Object.keys(target)) delete target[key];
-    Object.assign(target, source);
-  }
-  function toggleTranslation() {
-    isEnabled = !isEnabled;
-    localStorage.setItem(storageKey, String(isEnabled));
-    if (isEnabled) {
-      translatePage();
-    } else if (document.documentElement) {
-      translator.restore(document.documentElement);
-      restoreCardImages(document.documentElement);
-      document.documentElement.lang = "en";
-    }
-    const liveSocket = unsafeWindow.liveSocket;
-    unsafeWindow.requestAnimationFrame(() => {
-      if (redrawHsguruCharts(document, liveSocket) > 0) return;
-      nudgeHsguruCharts(document, (restore) => {
-        unsafeWindow.setTimeout(restore, 50);
-      });
-    });
-    registerMenus();
-  }
-  function registerMenus() {
-    if (translationMenuId !== void 0) {
-      GM_unregisterMenuCommand(translationMenuId);
-    }
-    if (updateCardsMenuId !== void 0) {
-      GM_unregisterMenuCommand(updateCardsMenuId);
-    }
-    translationMenuId = GM_registerMenuCommand(
-      isEnabled ? "切换为英文" : "切换为中文",
-      toggleTranslation
-    );
-    updateCardsMenuId = GM_registerMenuCommand("更新卡牌翻译数据", () => {
-      void updateCardTranslations(true);
-    });
-  }
-  function showCardUpdateNotice(message, type) {
-    document.querySelector("[data-hsguru-zh-card-update-notice]")?.remove();
-    const notice = document.createElement("div");
-    notice.dataset.hsguruZhCardUpdateNotice = "";
-    notice.setAttribute("role", type === "error" ? "alert" : "status");
-    notice.setAttribute("aria-live", "polite");
-    notice.textContent = message;
-    const backgrounds = {
-      loading: "rgb(30 35 35 / 96%)",
-      success: "rgb(35 75 57 / 96%)",
-      error: "rgb(112 45 45 / 96%)"
+  // src/i18n/resources.ts
+  var emptyDictionary = {};
+  function createTranslationResources(interfaceDictionary, cards) {
+    return {
+      dictionary: { ...cards?.dictionary, ...interfaceDictionary },
+      cardNamesByDbfId: cards?.namesByDbfId ?? emptyDictionary,
+      cardTextsByDbfId: cards?.textsByDbfId ?? emptyDictionary,
+      cardFlavorsByDbfId: cards?.flavorsByDbfId ?? emptyDictionary,
+      cardKeywordDictionary: cards?.keywordDictionary ?? emptyDictionary
     };
-    Object.assign(notice.style, {
-      position: "fixed",
-      zIndex: "2147483647",
-      top: "16px",
-      right: "16px",
-      maxWidth: "360px",
-      padding: "10px 14px",
-      border: "1px solid rgb(255 255 255 / 18%)",
-      borderRadius: "4px",
-      background: backgrounds[type],
-      color: "#ffffff",
-      fontSize: "14px",
-      lineHeight: "1.4",
-      boxShadow: "0 4px 16px rgb(0 0 0 / 30%)",
-      pointerEvents: "none"
-    });
-    (document.body ?? document.documentElement).append(notice);
-    if (type !== "loading") {
-      window.setTimeout(() => notice.remove(), 3200);
-    }
   }
-  async function updateCardTranslations(forceRefresh = false) {
-    if (forceRefresh && isCardUpdateInProgress) return;
-    if (forceRefresh) {
-      isCardUpdateInProgress = true;
-      showCardUpdateNotice("正在更新卡牌翻译数据…", "loading");
+
+  // src/mutation-roots.ts
+  function findOutermostNodes(nodes, getParent) {
+    const uniqueNodes = [...new Set(nodes)];
+    const candidates = new Set(uniqueNodes);
+    return uniqueNodes.filter((node) => {
+      let parent = getParent(node);
+      while (parent) {
+        if (candidates.has(parent)) return false;
+        parent = getParent(parent);
+      }
+      return true;
+    });
+  }
+
+  // src/runtime.ts
+  var storageKey = "hsguru-zh-cn:enabled";
+  function installHsguruZhCn() {
+    let translationResources = createTranslationResources(dictionary);
+    const translator = new PageTranslator(translationResources);
+    let cardRenderIdsByDbfId = {};
+    let hasLoadedCardLocalization = false;
+    let isEnabled = localStorage.getItem(storageKey) !== "false";
+    const originalDocumentLanguage = document.documentElement?.lang || "en";
+    installChartLabelTranslation(
+      unsafeWindow.CanvasRenderingContext2D?.prototype,
+      dictionary,
+      () => isEnabled
+    );
+    let translationMenuId;
+    let updateCardsMenuId;
+    let isCardUpdateInProgress = false;
+    let isClipboardTranslationInstalled = installDeckClipboardTranslation(
+      unsafeWindow.navigator.clipboard,
+      () => isEnabled
+    );
+    installDeckCopyButtonTranslation(
+      () => isEnabled,
+      (text) => GM_setClipboard(text)
+    );
+    function translatePage() {
+      if (!isEnabled || !document.documentElement) return;
+      document.documentElement.lang = "zh-CN";
+      translator.translate(document.documentElement);
+      localizeCardImages(document.documentElement, cardRenderIdsByDbfId);
     }
-    try {
-      const cardLocalization = await loadCardLocalization(forceRefresh);
-      Object.assign(runtimeDictionary, cardLocalization.dictionary, dictionary);
-      replaceRecord(cardNamesByDbfId, cardLocalization.namesByDbfId);
-      replaceRecord(cardTextsByDbfId, cardLocalization.textsByDbfId);
-      replaceRecord(cardFlavorsByDbfId, cardLocalization.flavorsByDbfId);
-      replaceRecord(cardKeywordDictionary, cardLocalization.keywordDictionary);
-      cardRenderIdsByDbfId = cardLocalization.renderIdsByDbfId;
+    function toggleTranslation() {
+      isEnabled = !isEnabled;
+      localStorage.setItem(storageKey, String(isEnabled));
+      if (isEnabled) {
+        translatePage();
+      } else if (document.documentElement) {
+        translator.restore(document.documentElement);
+        restoreCardImages(document.documentElement);
+        document.documentElement.lang = originalDocumentLanguage;
+      }
+      const liveSocket = unsafeWindow.liveSocket;
+      unsafeWindow.requestAnimationFrame(() => {
+        if (redrawHsguruCharts(document, liveSocket) > 0) return;
+        nudgeHsguruCharts(document, (restore) => {
+          unsafeWindow.setTimeout(restore, 50);
+        });
+      });
+      registerMenus();
+    }
+    function registerMenus() {
+      if (translationMenuId !== void 0) {
+        GM_unregisterMenuCommand(translationMenuId);
+      }
+      if (updateCardsMenuId !== void 0) {
+        GM_unregisterMenuCommand(updateCardsMenuId);
+      }
+      translationMenuId = GM_registerMenuCommand(
+        isEnabled ? "切换为英文" : "切换为中文",
+        toggleTranslation
+      );
+      updateCardsMenuId = GM_registerMenuCommand("更新卡牌翻译数据", () => {
+        void updateCardTranslations(true);
+      });
+    }
+    function showCardUpdateNotice(message, type) {
+      document.querySelector("[data-hsguru-zh-card-update-notice]")?.remove();
+      const notice = document.createElement("div");
+      notice.dataset.hsguruZhCardUpdateNotice = "";
+      notice.setAttribute("role", type === "error" ? "alert" : "status");
+      notice.setAttribute("aria-live", "polite");
+      notice.textContent = message;
+      const backgrounds = {
+        loading: "rgb(30 35 35 / 96%)",
+        success: "rgb(35 75 57 / 96%)",
+        error: "rgb(112 45 45 / 96%)"
+      };
+      Object.assign(notice.style, {
+        position: "fixed",
+        zIndex: "2147483647",
+        top: "16px",
+        right: "16px",
+        maxWidth: "360px",
+        padding: "10px 14px",
+        border: "1px solid rgb(255 255 255 / 18%)",
+        borderRadius: "4px",
+        background: backgrounds[type],
+        color: "#ffffff",
+        fontSize: "14px",
+        lineHeight: "1.4",
+        boxShadow: "0 4px 16px rgb(0 0 0 / 30%)",
+        pointerEvents: "none"
+      });
+      (document.body ?? document.documentElement).append(notice);
+      if (type !== "loading") {
+        window.setTimeout(() => notice.remove(), 3200);
+      }
+    }
+    async function updateCardTranslations(forceRefresh = false) {
+      if (forceRefresh && isCardUpdateInProgress) return;
+      if (forceRefresh) {
+        isCardUpdateInProgress = true;
+        showCardUpdateNotice("正在更新卡牌翻译数据…", "loading");
+      }
+      try {
+        const cardLocalization = await loadCardLocalization(forceRefresh);
+        if (hasLoadedCardLocalization && isEnabled && document.documentElement) {
+          translator.restore(document.documentElement);
+          restoreCardImages(document.documentElement);
+        }
+        translationResources = createTranslationResources(
+          dictionary,
+          cardLocalization
+        );
+        translator.replaceResources(translationResources);
+        cardRenderIdsByDbfId = cardLocalization.renderIdsByDbfId;
+        hasLoadedCardLocalization = true;
+        translatePage();
+        if (forceRefresh) {
+          if (cardLocalization.source === "network") {
+            const cardCount = Object.keys(cardLocalization.namesByDbfId).length;
+            showCardUpdateNotice(
+              `卡牌翻译数据已更新（${cardCount.toLocaleString("zh-CN")} 张）`,
+              "success"
+            );
+          } else {
+            showCardUpdateNotice("更新失败，已继续使用原有缓存", "error");
+          }
+        }
+        console.info(
+          `[HSGuru 中文助手] 已加载 ${Object.keys(cardLocalization.dictionary).length} 条卡牌翻译。`
+        );
+      } catch (error) {
+        if (forceRefresh) {
+          showCardUpdateNotice("卡牌翻译数据更新失败，请稍后重试", "error");
+        }
+        console.warn("[HSGuru 中文助手] 卡牌翻译数据加载失败。", error);
+      } finally {
+        if (forceRefresh) isCardUpdateInProgress = false;
+      }
+    }
+    function start() {
+      if (!isClipboardTranslationInstalled) {
+        isClipboardTranslationInstalled = installDeckClipboardTranslation(
+          unsafeWindow.navigator.clipboard,
+          () => isEnabled
+        );
+      }
       translatePage();
-      if (forceRefresh) {
-        if (cardLocalization.source === "network") {
-          const cardCount = Object.keys(cardLocalization.namesByDbfId).length;
-          showCardUpdateNotice(
-            `卡牌翻译数据已更新（${cardCount.toLocaleString("zh-CN")} 张）`,
-            "success"
-          );
-        } else {
-          showCardUpdateNotice("更新失败，已继续使用原有缓存", "error");
+      const observer = new MutationObserver((mutations) => {
+        if (!isEnabled) return;
+        const candidates = [];
+        for (const mutation of mutations) {
+          if (mutation.type === "characterData" || mutation.type === "attributes") {
+            candidates.push(mutation.target);
+          }
+          for (const node of mutation.addedNodes) candidates.push(node);
         }
-      }
-      console.info(
-        `[HSGuru 中文助手] 已加载 ${Object.keys(cardLocalization.dictionary).length} 条卡牌翻译。`
-      );
-    } catch (error) {
-      if (forceRefresh) {
-        showCardUpdateNotice("卡牌翻译数据更新失败，请稍后重试", "error");
-      }
-      console.warn("[HSGuru 中文助手] 卡牌翻译数据加载失败。", error);
-    } finally {
-      if (forceRefresh) isCardUpdateInProgress = false;
+        const roots = findOutermostNodes(
+          candidates,
+          (node) => node.parentNode
+        );
+        for (const root of roots) {
+          translator.translate(root);
+          localizeCardImages(root, cardRenderIdsByDbfId);
+        }
+      });
+      observer.observe(document.documentElement, {
+        childList: true,
+        characterData: true,
+        subtree: true,
+        attributes: true,
+        attributeFilter: ["alt", "aria-label", "placeholder", "src", "title"]
+      });
+      registerMenus();
+      void updateCardTranslations();
+    }
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", start, { once: true });
+    } else {
+      start();
     }
   }
-  function start() {
-    if (!isClipboardTranslationInstalled) {
-      isClipboardTranslationInstalled = installDeckClipboardTranslation(
-        unsafeWindow.navigator.clipboard,
-        () => isEnabled
-      );
-    }
-    translatePage();
-    const observer = new MutationObserver((mutations) => {
-      if (!isEnabled) return;
-      for (const mutation of mutations) {
-        if (mutation.type === "characterData") {
-          translator.translate(mutation.target);
-        }
-        if (mutation.type === "attributes") {
-          translator.translate(mutation.target);
-          localizeCardImages(mutation.target, cardRenderIdsByDbfId);
-        }
-        for (const node of mutation.addedNodes) {
-          translator.translate(node);
-          localizeCardImages(node, cardRenderIdsByDbfId);
-        }
-      }
-    });
-    observer.observe(document.documentElement, {
-      childList: true,
-      characterData: true,
-      subtree: true,
-      attributes: true,
-      attributeFilter: ["alt", "aria-label", "placeholder", "src", "title"]
-    });
-    registerMenus();
-    void updateCardTranslations();
-  }
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", start, { once: true });
-  } else {
-    start();
-  }
+
+  // src/index.ts
+  installHsguruZhCn();
 })();
