@@ -12,6 +12,7 @@ import { loadCardLocalization } from './data/card-dictionary';
 import { dictionary } from './i18n/dictionary';
 import { createTranslationResources } from './i18n/resources';
 import { PageTranslator } from './i18n/translator';
+import { findOutermostNodes } from './mutation-roots';
 
 const storageKey = 'hsguru-zh-cn:enabled';
 
@@ -20,6 +21,7 @@ export function installHsguruZhCn(): void {
   let translationResources = createTranslationResources(dictionary);
   const translator = new PageTranslator(translationResources);
   let cardRenderIdsByDbfId: Readonly<Record<string, string>> = {};
+  let hasLoadedCardLocalization = false;
   let isEnabled = localStorage.getItem(storageKey) !== 'false';
   const originalDocumentLanguage = document.documentElement?.lang || 'en';
 
@@ -140,9 +142,9 @@ export function installHsguruZhCn(): void {
 
     try {
       const cardLocalization = await loadCardLocalization(forceRefresh);
-      // 先恢复使用旧资源生成的文本，再原子替换资源并重新翻译。
-      // 这样卡牌数据更新后不会保留已删除条目或继续显示旧译文。
-      if (isEnabled && document.documentElement) {
+      // 首次加载前页面只使用界面词典，无需多做一次整页恢复。
+      // 后续刷新则先恢复旧资源生成的内容，避免残留旧译文和旧卡图。
+      if (hasLoadedCardLocalization && isEnabled && document.documentElement) {
         translator.restore(document.documentElement);
         restoreCardImages(document.documentElement);
       }
@@ -152,6 +154,7 @@ export function installHsguruZhCn(): void {
       );
       translator.replaceResources(translationResources);
       cardRenderIdsByDbfId = cardLocalization.renderIdsByDbfId;
+      hasLoadedCardLocalization = true;
       translatePage();
 
       if (forceRefresh) {
@@ -190,18 +193,24 @@ export function installHsguruZhCn(): void {
     const observer = new MutationObserver((mutations) => {
       if (!isEnabled) return;
 
+      const candidates: Node[] = [];
       for (const mutation of mutations) {
-        if (mutation.type === 'characterData') {
-          translator.translate(mutation.target);
+        if (
+          mutation.type === 'characterData' ||
+          mutation.type === 'attributes'
+        ) {
+          candidates.push(mutation.target);
         }
-        if (mutation.type === 'attributes') {
-          translator.translate(mutation.target);
-          localizeCardImages(mutation.target, cardRenderIdsByDbfId);
-        }
-        for (const node of mutation.addedNodes) {
-          translator.translate(node);
-          localizeCardImages(node, cardRenderIdsByDbfId);
-        }
+        for (const node of mutation.addedNodes) candidates.push(node);
+      }
+
+      const roots = findOutermostNodes(
+        candidates,
+        (node) => node.parentNode as Node | null,
+      );
+      for (const root of roots) {
+        translator.translate(root);
+        localizeCardImages(root, cardRenderIdsByDbfId);
       }
     });
 
