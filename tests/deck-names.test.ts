@@ -28,7 +28,9 @@ test('translates current HSGuru shorthand names', () => {
 });
 
 test('translates deck names from the signed-in homepage', () => {
-  assert.equal(translateDeckName('Attack Druid'), '攻击德');
+  assert.equal(translateDeckName('Attack Druid'), '口德');
+  assert.equal(translateDeckName('Attack Druid Standard'), '口德 标准模式');
+  assert.equal(translateDeckName('Attack Warrior'), '攻击战');
   assert.equal(translateDeckName("BUU Thal'ena DK"), '血邪邪萨安娜DK');
   assert.equal(translateDeckName('BUU Bwonsamdi DK'), '血邪邪邦桑迪DK');
 });

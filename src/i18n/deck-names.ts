@@ -1,3 +1,7 @@
+const exactDeckNameTranslations: Readonly<Record<string, string>> = {
+  'Attack Druid': '口德',
+};
+
 const phraseTranslations: ReadonlyArray<readonly [string, string]> = [
   ['End of Turnadin', '回合结束骑'],
   ['Splendiferous Whizbang', '威兹班'],
@@ -315,6 +319,9 @@ export function translateDeckName(source: string): string {
       break;
     }
   }
+
+  const exactTranslation = exactDeckNameTranslations[remaining];
+  if (exactTranslation) return `${exactTranslation}${formatSuffix}`;
 
   for (const [english, chinese] of classSuffixes) {
     if (remaining === english || remaining.endsWith(` ${english}`)) {
