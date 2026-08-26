@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         HSGuru 中文助手
 // @namespace    https://github.com/lvdongxiao/hsguru-zh-cn
-// @version      1.1.0
+// @version      1.1.1
 // @description  为 HSGuru 网站提供简体中文界面
 // @author       lvdongxiao
 // @homepageURL  https://github.com/lvdongxiao/hsguru-zh-cn
@@ -124,6 +124,9 @@
   }
 
   // src/i18n/deck-names.ts
+  var exactDeckNameTranslations = {
+    "Attack Druid": "口德"
+  };
   var phraseTranslations = [
     ["End of Turnadin", "回合结束骑"],
     ["Splendiferous Whizbang", "威兹班"],
@@ -432,6 +435,8 @@
         break;
       }
     }
+    const exactTranslation = exactDeckNameTranslations[remaining];
+    if (exactTranslation) return `${exactTranslation}${formatSuffix}`;
     for (const [english, chinese] of classSuffixes) {
       if (remaining === english || remaining.endsWith(` ${english}`)) {
         remaining = remaining.slice(0, -english.length).trim();
@@ -1460,6 +1465,7 @@
     "All Formats": "全部模式",
     Restoration: "艾泽拉斯复兴",
     Timeways: "穿越时间流",
+    "Azeroth's Most Wanted": "艾泽拉斯头号通缉",
     "Day of Rebirth": "重生之日",
     "Emerald Dream": "漫游翡翠梦境",
     Starcraft: "星际争霸",
