@@ -202,6 +202,7 @@ export const dictionary: Readonly<Record<string, string>> = {
   'All Formats': '全部模式',
   Restoration: '艾泽拉斯复兴',
   Timeways: '穿越时间流',
+  "Azeroth's Most Wanted": '艾泽拉斯头号通缉',
   'Day of Rebirth': '重生之日',
   'Emerald Dream': '漫游翡翠梦境',
   Starcraft: '星际争霸',

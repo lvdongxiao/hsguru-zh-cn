@@ -32,6 +32,13 @@ test('translates player-scope dropdown options', () => {
   assert.equal(translateText('My Games', siteDictionary), '我的对局');
 });
 
+test('translates the current deck statistics period', () => {
+  assert.equal(
+    translateText("Azeroth's Most Wanted", siteDictionary),
+    '艾泽拉斯头号通缉',
+  );
+});
+
 test('translates the signed-out player stats page', () => {
   assert.equal(
     translateText('You need to log in to view this page', siteDictionary),
