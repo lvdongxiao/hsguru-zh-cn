@@ -47,6 +47,7 @@ const wordTranslations: Readonly<Record<string, string>> = {
   Handbuff: '污手',
   Deathrattle: '亡语',
   Secret: '奥秘',
+  Sneaky: '潜行',
   Libram: '圣契',
   Miracle: '奇迹',
   Mill: '爆牌',

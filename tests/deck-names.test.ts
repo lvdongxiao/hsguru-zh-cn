@@ -12,6 +12,18 @@ test('combines an archetype and class into a conventional Chinese deck name', ()
   assert.equal(translateDeckName("Lo'Gosh Warrior"), '洛戈什战');
 });
 
+test('translates Sneaky archetypes with exact token boundaries', () => {
+  assert.equal(translateDeckName('Sneaky Harold Rogue'), '潜行兆示贼');
+  assert.equal(translateDeckName('Sneaky Rogue'), '潜行贼');
+  assert.equal(
+    translateDeckName('Sneaky Harold Rogue Standard'),
+    '潜行兆示贼 标准模式',
+  );
+  assert.equal(translateDeckName('Harold Rogue'), '兆示贼');
+  assert.equal(translateDeckName('Sneakyish Harold Rogue'), 'Sneakyish兆示贼');
+  assert.equal(translateDeckName('sneaky Harold Rogue'), 'sneaky兆示贼');
+});
+
 test('supports Death Knight rune prefixes', () => {
   assert.equal(translateDeckName('BUU Egg DK'), '血邪邪蛋DK');
   assert.equal(translateDeckName('BBUU Chef Druid'), '血血邪邪主厨德');
