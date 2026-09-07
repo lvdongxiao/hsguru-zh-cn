@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         HSGuru 中文助手
 // @namespace    https://github.com/lvdongxiao/hsguru-zh-cn
-// @version      1.1.1
+// @version      1.1.2
 // @description  为 HSGuru 网站提供简体中文界面
 // @author       lvdongxiao
 // @homepageURL  https://github.com/lvdongxiao/hsguru-zh-cn
@@ -171,6 +171,7 @@
     Handbuff: "污手",
     Deathrattle: "亡语",
     Secret: "奥秘",
+    Sneaky: "潜行",
     Libram: "圣契",
     Miracle: "奇迹",
     Mill: "爆牌",
