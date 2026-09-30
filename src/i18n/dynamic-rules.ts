@@ -1,6 +1,11 @@
 import { translateDeckName } from './deck-names';
 import type { TranslationDictionary } from './text';
 
+/** 仅用于已确认的时长字段，避免把其他语境的 m 当作分钟。 */
+export function translateDurationValue(source: string): string {
+  return source.replace(/^(\s*)(\d+(?:\.\d+)?)m(\s*)$/, '$1$2 分钟$3');
+}
+
 /** 翻译包含数字、时间、赛季等变量的受控界面文案。 */
 export function translateDynamicText(
   content: string,

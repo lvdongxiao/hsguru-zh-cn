@@ -4,6 +4,32 @@ import {
   type TranslationDictionary,
 } from './text';
 
+/** 翻译卡牌链接提示，保留数量和费用，不从英文名称猜测卡牌身份。 */
+export function translateCardLabelByHref(
+  source: string,
+  href: string,
+  namesByDbfId: TranslationDictionary,
+  dictionary: TranslationDictionary,
+): string {
+  const dbfId = getCardDbfIdFromHref(href);
+  const name = dbfId ? namesByDbfId[dbfId] : undefined;
+  if (!name) return source;
+
+  const match = source
+    .trim()
+    .match(
+      /^(?:(\d+)x )?[^\n]+? \((?:(\d+) mana|(Minion|Spell|Weapon|Location|Hero))\)$/,
+    );
+  if (!match) return source;
+  const detail =
+    match[2] !== undefined ? `${match[2]} 费` : dictionary[match[3]];
+  if (!detail) return source;
+  return replacePreservingWhitespace(
+    source,
+    `${match[1] ? `${match[1]}x ` : ''}${name}（${detail}）`,
+  );
+}
+
 export function translateCardTextByHref(
   source: string,
   href: string,

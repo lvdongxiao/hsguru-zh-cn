@@ -27,6 +27,30 @@ test('translates the select-all dropdown option', () => {
   assert.equal(translateText('Select All', siteDictionary), '全选');
 });
 
+test('translates deck filter search labels, view controls and loading text', () => {
+  const expected: Readonly<Record<string, string>> = {
+    Grid: '网格',
+    Table: '表格',
+    'Grid View': '网格视图',
+    'Table View': '表格视图',
+    'Loading…': '加载中…',
+    'Search Archetypes': '搜索套牌类型',
+    'Search Include cards': '搜索包含卡牌',
+    'Search Exclude cards': '搜索排除卡牌',
+    'Search Opponent Archetype': '搜索对手套牌类型',
+  };
+  for (const [source, translated] of Object.entries(expected)) {
+    assert.equal(translateText(source, siteDictionary), translated);
+    assert.equal(
+      translateText(`  ${source}\n`, siteDictionary),
+      `  ${translated}\n`,
+    );
+  }
+  for (const source of ['Gridiron', 'Tabletop', 'grid', 'Loading… more']) {
+    assert.equal(translateText(source, siteDictionary), source);
+  }
+});
+
 test('translates player-scope dropdown options', () => {
   assert.equal(translateText('All Players', siteDictionary), '所有玩家');
   assert.equal(translateText('My Games', siteDictionary), '我的对局');

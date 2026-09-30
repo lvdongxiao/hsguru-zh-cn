@@ -1,9 +1,11 @@
 import {
   translateCardDetailTextByHref,
   translateCardKeywords,
+  translateCardLabelByHref,
   translateCardTextByHref,
 } from './card-text';
 import { translateDeckName } from './deck-names';
+import { translateDurationValue } from './dynamic-rules';
 import {
   translateCountryOption,
   translateText,
@@ -183,6 +185,15 @@ export class PageTranslator {
     const original = node.data;
     const resources = this.#resources;
     let translated = translateText(original, resources.dictionary);
+    if (
+      translated === original &&
+      parent.closest('#deck_stats_container table') &&
+      ['duration', '时长'].includes(
+        parent.nextElementSibling?.textContent?.trim() ?? '',
+      )
+    ) {
+      translated = translateDurationValue(original);
+    }
     if (translated === original) {
       const countryCode = getCountryCodeFromElement(parent);
       if (countryCode)
@@ -247,6 +258,20 @@ export class PageTranslator {
       if (previous && value === previous.translated) continue;
 
       let translated = translateText(value, this.#resources.dictionary);
+      if (
+        translated === value &&
+        (attribute === 'title' || attribute === 'aria-label')
+      ) {
+        const href = element.closest('a[href*="/card/"]')?.getAttribute('href');
+        if (href) {
+          translated = translateCardLabelByHref(
+            value,
+            href,
+            this.#resources.cardNamesByDbfId,
+            this.#resources.dictionary,
+          );
+        }
+      }
       if (translated === value && attribute === 'alt') {
         const href = element.closest('a[href*="/card/"]')?.getAttribute('href');
         if (href) {

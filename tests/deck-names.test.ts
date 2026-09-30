@@ -29,6 +29,41 @@ test('supports Death Knight rune prefixes', () => {
   assert.equal(translateDeckName('BBUU Chef Druid'), '血血邪邪主厨德');
 });
 
+test('translates newly added deck and opponent filter archetypes', () => {
+  const expected: Readonly<Record<string, string>> = {
+    'Dragon Tamer Hunter': '驯龙猎',
+    'Drake Warlock': '土石幼龙术',
+    'Harold Piglock': '兆示野猪术',
+    'Impformant Warlock': '卧底小鬼术',
+    'Morchie Rogue': '米罗克贼',
+    'Mother Hunter': '圣母猎',
+    'Mother Rogue': '圣母贼',
+    Piglock: '野猪术',
+    'Logosh Warrior': '洛戈什战',
+  };
+
+  for (const [source, translated] of Object.entries(expected)) {
+    assert.equal(translateDeckName(source), translated);
+    assert.equal(
+      translateDeckName(`${source} Standard`),
+      `${translated} 标准模式`,
+    );
+  }
+});
+
+test('keeps new archetype aliases within exact token boundaries', () => {
+  assert.equal(translateDeckName('Dragon Hunter'), '龙猎');
+  assert.equal(translateDeckName('Dragon Tamerish Hunter'), '龙Tamerish猎');
+  assert.equal(translateDeckName('Drakewarden Warlock'), 'Drakewarden术');
+  assert.equal(translateDeckName('Motherless Rogue'), 'Motherless贼');
+  assert.equal(translateDeckName('Impformants Warlock'), 'Impformants术');
+  assert.equal(translateDeckName('Morchies Rogue'), 'Morchies贼');
+  assert.equal(translateDeckName('Piglocks'), 'Piglocks');
+  assert.equal(translateDeckName('Logoshua Warrior'), 'Logoshua战');
+  assert.equal(translateDeckName('mother Hunter'), 'mother猎');
+  assert.equal(translateDeckName('CaprioDi Warrior'), 'CaprioDi战');
+});
+
 test('translates current HSGuru shorthand names', () => {
   assert.equal(translateDeckName('AYAYA Rogue'), '艾雅贼');
   assert.equal(translateDeckName('Zee Shaman'), '随从萨');

@@ -9,6 +9,8 @@ const originalBackgroundAttribute =
   'data-hsguru-zh-original-card-background-image';
 const localizedBackgroundAttribute =
   'data-hsguru-zh-localized-card-background-image';
+const hoverPreviewSelector =
+  '.decklist-card-image, [id^="compact-card-preview-"]';
 
 export function getChineseCardRenderUrl(renderId: string): string {
   return `${renderBaseUrl}/${encodeURIComponent(renderId)}.png`;
@@ -34,13 +36,11 @@ function findCardImages(root: Node): HTMLImageElement[] {
 
 function findHoverCardPreviews(root: Node): HTMLElement[] {
   const previews: HTMLElement[] = [];
-  if (root instanceof HTMLElement && root.matches('.decklist-card-image')) {
+  if (root instanceof HTMLElement && root.matches(hoverPreviewSelector)) {
     previews.push(root);
   }
   if (root instanceof Element || root instanceof Document) {
-    previews.push(
-      ...root.querySelectorAll<HTMLElement>('.decklist-card-image'),
-    );
+    previews.push(...root.querySelectorAll<HTMLElement>(hoverPreviewSelector));
   }
   return previews;
 }
@@ -71,7 +71,10 @@ export function localizeCardImages(
   }
 
   for (const preview of findHoverCardPreviews(root)) {
-    const cardHref = preview.closest('a[href*="/card/"]')?.getAttribute('href');
+    const cardLink = preview.matches('[id^="compact-card-preview-"]')
+      ? preview.parentElement?.querySelector(':scope > a[href*="/card/"]')
+      : preview.closest('a[href*="/card/"]');
+    const cardHref = cardLink?.getAttribute('href');
     const dbfId = cardHref ? getCardDbfIdFromHref(cardHref) : undefined;
     const renderId = dbfId ? renderIdsByDbfId[dbfId] : undefined;
     if (!renderId) continue;
