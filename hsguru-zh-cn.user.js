@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         HSGuru 中文助手
 // @namespace    https://github.com/lvdongxiao/hsguru-zh-cn
-// @version      1.1.2
+// @version      1.2.0
 // @description  为 HSGuru 网站提供简体中文界面
 // @author       lvdongxiao
 // @homepageURL  https://github.com/lvdongxiao/hsguru-zh-cn
@@ -36,6 +36,7 @@
   var localizedSourceAttribute = "data-hsguru-zh-localized-card-src";
   var originalBackgroundAttribute = "data-hsguru-zh-original-card-background-image";
   var localizedBackgroundAttribute = "data-hsguru-zh-localized-card-background-image";
+  var hoverPreviewSelector = '.decklist-card-image, [id^="compact-card-preview-"]';
   function getChineseCardRenderUrl(renderId) {
     return `${renderBaseUrl}/${encodeURIComponent(renderId)}.png`;
   }
@@ -55,13 +56,11 @@
   }
   function findHoverCardPreviews(root) {
     const previews = [];
-    if (root instanceof HTMLElement && root.matches(".decklist-card-image")) {
+    if (root instanceof HTMLElement && root.matches(hoverPreviewSelector)) {
       previews.push(root);
     }
     if (root instanceof Element || root instanceof Document) {
-      previews.push(
-        ...root.querySelectorAll(".decklist-card-image")
-      );
+      previews.push(...root.querySelectorAll(hoverPreviewSelector));
     }
     return previews;
   }
@@ -86,7 +85,8 @@
       }
     }
     for (const preview of findHoverCardPreviews(root)) {
-      const cardHref = preview.closest('a[href*="/card/"]')?.getAttribute("href");
+      const cardLink = preview.matches('[id^="compact-card-preview-"]') ? preview.parentElement?.querySelector(':scope > a[href*="/card/"]') : preview.closest('a[href*="/card/"]');
+      const cardHref = cardLink?.getAttribute("href");
       const dbfId = cardHref ? getCardDbfIdFromHref(cardHref) : void 0;
       const renderId = dbfId ? renderIdsByDbfId[dbfId] : void 0;
       if (!renderId) continue;
@@ -139,6 +139,7 @@
     ["No Minion", "法术"],
     ["Cliff Dive", "跳水"],
     ["Dark Gift", "黑暗之赐"],
+    ["Dragon Tamer", "驯龙"],
     ["Void Soul", "虚空灵魂"],
     ["Two-Bit", "二费"],
     ["Tick Tock", "新任务"],
@@ -316,6 +317,11 @@
     Deios: "戴欧斯",
     Discolock: "弃牌术",
     Egglock: "蛋术",
+    Piglock: "野猪术",
+    Impformant: "卧底小鬼",
+    Mother: "圣母",
+    Drake: "土石幼龙",
+    Morchie: "米罗克",
     Deckless: "轮盘",
     Evenlock: "偶数术",
     Harold: "兆示",
@@ -362,6 +368,7 @@
     Kingsbane: "弑君",
     Leoroxx: "莱欧洛克斯",
     "Lo'Gosh": "洛戈什",
+    Logosh: "洛戈什",
     "Mecha'thun": "机械克苏恩",
     "Ohn'ahra": "欧恩哈拉",
     Rivendare: "瑞文戴尔",
@@ -463,6 +470,9 @@
   }
 
   // src/i18n/dynamic-rules.ts
+  function translateDurationValue(source) {
+    return source.replace(/^(\s*)(\d+(?:\.\d+)?)m(\s*)$/, "$1$2 分钟$3");
+  }
   function translateDynamicText(content, dictionary2) {
     let match;
     if (match = content.match(/^(.+?)(\s*[↑↓])$/)) {
@@ -619,6 +629,21 @@
   }
 
   // src/i18n/card-text.ts
+  function translateCardLabelByHref(source, href, namesByDbfId, dictionary2) {
+    const dbfId = getCardDbfIdFromHref(href);
+    const name = dbfId ? namesByDbfId[dbfId] : void 0;
+    if (!name) return source;
+    const match = source.trim().match(
+      /^(?:(\d+)x )?[^\n]+? \((?:(\d+) mana|(Minion|Spell|Weapon|Location|Hero))\)$/
+    );
+    if (!match) return source;
+    const detail = match[2] !== void 0 ? `${match[2]} 费` : dictionary2[match[3]];
+    if (!detail) return source;
+    return replacePreservingWhitespace(
+      source,
+      `${match[1] ? `${match[1]}x ` : ""}${name}（${detail}）`
+    );
+  }
   function translateCardTextByHref(source, href, namesByDbfId) {
     if (source.trim() === "") return source;
     const dbfId = getCardDbfIdFromHref(href);
@@ -769,6 +794,11 @@
       const original = node.data;
       const resources = this.#resources;
       let translated = translateText(original, resources.dictionary);
+      if (translated === original && parent.closest("#deck_stats_container table") && ["duration", "时长"].includes(
+        parent.nextElementSibling?.textContent?.trim() ?? ""
+      )) {
+        translated = translateDurationValue(original);
+      }
       if (translated === original) {
         const countryCode = getCountryCodeFromElement(parent);
         if (countryCode)
@@ -820,6 +850,17 @@
         const previous = this.#translatedAttributes.get(element)?.get(attribute);
         if (previous && value === previous.translated) continue;
         let translated = translateText(value, this.#resources.dictionary);
+        if (translated === value && (attribute === "title" || attribute === "aria-label")) {
+          const href = element.closest('a[href*="/card/"]')?.getAttribute("href");
+          if (href) {
+            translated = translateCardLabelByHref(
+              value,
+              href,
+              this.#resources.cardNamesByDbfId,
+              this.#resources.dictionary
+            );
+          }
+        }
         if (translated === value && attribute === "alt") {
           const href = element.closest('a[href*="/card/"]')?.getAttribute("href");
           if (href) {
@@ -1294,6 +1335,28 @@
     Previous: "上一页",
     Next: "下一页",
     Loading: "加载中",
+    "Loading…": "加载中…",
+    Grid: "网格",
+    Table: "表格",
+    "Grid View": "网格视图",
+    "Table View": "表格视图",
+    "Card Top": "卡牌顶部",
+    "Cropped Card": "裁剪卡图",
+    "Card Top View (Cut off below rarity gem)": "卡牌顶部视图（截取至稀有度宝石下方）",
+    "Cropped Card View (Card art with stat overlays)": "裁剪卡图视图（叠加卡牌数值）",
+    "Sort by Winrate": "按胜率排序",
+    "Sort by Total Games": "按总对局数排序",
+    "Sort by Average Turns": "按平均回合数排序",
+    "Sort by Average Duration": "按平均时长排序",
+    "Deck code": "套牌代码",
+    "Crafting Dust": "合成所需奥术之尘",
+    games: "对局数",
+    turns: "回合数",
+    duration: "时长",
+    "Search Archetypes": "搜索套牌类型",
+    "Search Include cards": "搜索包含卡牌",
+    "Search Exclude cards": "搜索排除卡牌",
+    "Search Opponent Archetype": "搜索对手套牌类型",
     "No data": "暂无数据",
     "New!": "新功能！",
     Copy: "复制",
