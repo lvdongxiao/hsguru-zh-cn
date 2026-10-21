@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         HSGuru 中文助手
 // @namespace    https://github.com/lvdongxiao/hsguru-zh-cn
-// @version      1.2.0
+// @version      26.3.0
 // @description  为 HSGuru 网站提供简体中文界面
 // @author       lvdongxiao
 // @homepageURL  https://github.com/lvdongxiao/hsguru-zh-cn
@@ -165,6 +165,7 @@
     Control: "控制",
     Midrange: "中速",
     Combo: "组合技",
+    Discard: "弃牌",
     Quest: "任务",
     Questline: "任务",
     Exodia: "艾克佐迪亚",
@@ -190,6 +191,7 @@
     Starship: "星舰",
     Rainbow: "彩虹",
     Zoo: "动物园",
+    Zoolock: "动物园术",
     Egg: "蛋",
     Thief: "脏",
     Fatigue: "疲劳",
@@ -222,6 +224,7 @@
     Warsong: "战歌",
     Void: "虚空",
     Prepared: "预备",
+    Rush: "突袭",
     Archmage: "大法师",
     Cycle: "过牌",
     Dino: "恐龙",
@@ -319,6 +322,7 @@
     Egglock: "蛋术",
     Piglock: "野猪术",
     Impformant: "卧底小鬼",
+    IMPFERNAL: "小鬼地狱火",
     Mother: "圣母",
     Drake: "土石幼龙",
     Morchie: "米罗克",
@@ -399,7 +403,14 @@
     Wilted: "枯萎",
     Wo: "沃",
     Ysondre: "伊森德雷",
-    Zuramat: "祖拉玛特"
+    Zuramat: "祖拉玛特",
+    Ammunae: "阿穆纳伊",
+    "C'Thun": "克苏恩",
+    "N'Zoth": "恩佐斯",
+    Neptulon: "耐普图隆",
+    Summoner: "召唤",
+    Yogg: "尤格-萨隆",
+    "Y'Shaarj": "亚煞极"
   };
   var classSuffixes = [
     ["Demon Hunter", "瞎"],
@@ -1529,6 +1540,7 @@
     "All Formats": "全部模式",
     Restoration: "艾泽拉斯复兴",
     Timeways: "穿越时间流",
+    "Black Empire": "黑暗帝国的统治",
     "Azeroth's Most Wanted": "艾泽拉斯头号通缉",
     "Day of Rebirth": "重生之日",
     "Emerald Dream": "漫游翡翠梦境",
@@ -1780,6 +1792,7 @@
     "Show cards in deck": "显示套牌中的卡牌",
     "Hide cards in deck": "隐藏套牌中的卡牌",
     // 卡牌系列（按 HSGuru 当前筛选器完整覆盖）
+    "Reign of the Black Empire": "黑暗帝国的统治",
     "Escape from Violet Hold": "逃离紫罗兰监狱",
     "Violet Hold": "紫罗兰监狱",
     CATACLYSM: "大灾变",
