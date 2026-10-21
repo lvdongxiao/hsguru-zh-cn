@@ -226,6 +226,7 @@ export const dictionary: Readonly<Record<string, string>> = {
   'All Formats': '全部模式',
   Restoration: '艾泽拉斯复兴',
   Timeways: '穿越时间流',
+  'Black Empire': '黑暗帝国的统治',
   "Azeroth's Most Wanted": '艾泽拉斯头号通缉',
   'Day of Rebirth': '重生之日',
   'Emerald Dream': '漫游翡翠梦境',
@@ -490,6 +491,7 @@ export const dictionary: Readonly<Record<string, string>> = {
   'Hide cards in deck': '隐藏套牌中的卡牌',
 
   // 卡牌系列（按 HSGuru 当前筛选器完整覆盖）
+  'Reign of the Black Empire': '黑暗帝国的统治',
   'Escape from Violet Hold': '逃离紫罗兰监狱',
   'Violet Hold': '紫罗兰监狱',
   CATACLYSM: '大灾变',

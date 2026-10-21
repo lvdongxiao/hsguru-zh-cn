@@ -51,6 +51,90 @@ test('translates newly added deck and opponent filter archetypes', () => {
   }
 });
 
+test('translates Black Empire archetypes from the complete deck filter', () => {
+  const expected: Readonly<Record<string, string>> = {
+    'Ammunae Druid': '阿穆纳伊德',
+    "Ammunae N'Zoth Druid": '阿穆纳伊恩佐斯德',
+    "C'Thun DH": '克苏恩瞎',
+    "C'Thun DK": '克苏恩DK',
+    "C'Thun Druid": '克苏恩德',
+    "C'Thun Hunter": '克苏恩猎',
+    "C'Thun Mage": '克苏恩法',
+    "C'Thun Paladin": '克苏恩骑',
+    "C'Thun Priest": '克苏恩牧',
+    "C'Thun Quest Priest": '克苏恩任务牧',
+    "C'Thun Rogue": '克苏恩贼',
+    "C'Thun Shaman": '克苏恩萨',
+    "C'Thun Warlock": '克苏恩术',
+    "C'Thun Warrior": '克苏恩战',
+    'Discard Warlock': '弃牌术',
+    'IMPFERNAL Hunter': '小鬼地狱火猎',
+    'Neptulon Shaman': '耐普图隆萨',
+    "N'Zoth Combo Rogue": '恩佐斯组合技贼',
+    "N'Zoth DH": '恩佐斯瞎',
+    "N'Zoth DK": '恩佐斯DK',
+    "N'Zoth Druid": '恩佐斯德',
+    "N'Zoth Hunter": '恩佐斯猎',
+    "N'Zoth Mage": '恩佐斯法',
+    "N'Zoth Mech Hunter": '恩佐斯机械猎',
+    "N'Zoth Paladin": '恩佐斯骑',
+    "N'Zoth Priest": '恩佐斯牧',
+    "N'Zoth Rogue": '恩佐斯贼',
+    "N'Zoth Shaman": '恩佐斯萨',
+    "N'Zoth Warlock": '恩佐斯术',
+    "N'Zoth Warrior": '恩佐斯战',
+    'Rush DH': '突袭瞎',
+    'Summoner Mage': '召唤法',
+    'Yogg DH': '尤格-萨隆瞎',
+    'Yogg DK': '尤格-萨隆DK',
+    'Yogg Druid': '尤格-萨隆德',
+    'Yogg Mage': '尤格-萨隆法',
+    'Yogg Paladin': '尤格-萨隆骑',
+    'Yogg Rogue': '尤格-萨隆贼',
+    'Yogg Warlock': '尤格-萨隆术',
+    'Yogg Warrior': '尤格-萨隆战',
+    "Y'Shaarj DH": '亚煞极瞎',
+    "Y'Shaarj DK": '亚煞极DK',
+    "Y'Shaarj Paladin": '亚煞极骑',
+    "Y'Shaarj Warlock": '亚煞极术',
+    "Y'Shaarj Warrior": '亚煞极战',
+    "Zee C'Thun Shaman": '随从克苏恩萨',
+    Zoolock: '动物园术',
+  };
+
+  for (const [source, translated] of Object.entries(expected)) {
+    assert.equal(translateDeckName(source), translated);
+    assert.equal(
+      translateDeckName(`${source} Standard`),
+      `${translated} 标准模式`,
+    );
+  }
+});
+
+test('keeps Black Empire roots case-sensitive and bounded by whole tokens', () => {
+  const expected = {
+    'Ammunaes Druid': 'Ammunaes德',
+    "C'Thunder Warrior": "C'Thunder战",
+    "N'Zothling Rogue": "N'Zothling贼",
+    "Y'Shaarjling DK": "Y'ShaarjlingDK",
+    'Yoggers Mage': 'Yoggers法',
+    'Neptulons Shaman': 'Neptulons萨',
+    'Summoners Mage': 'Summoners法',
+    'Rushmore DH': 'Rushmore瞎',
+    'Discarded Warlock': 'Discarded术',
+    'IMPFERNALS Hunter': 'IMPFERNALS猎',
+    'ammunae Druid': 'ammunae德',
+    Zoolocks: 'Zoolocks',
+    zoolock: 'zoolock',
+  };
+  for (const [source, translated] of Object.entries(expected)) {
+    assert.equal(translateDeckName(source), translated);
+  }
+  assert.equal(translateDeckName("Mecha'thun Druid"), '机械克苏恩德');
+  assert.equal(translateDeckName('Discolock'), '弃牌术');
+  assert.equal(translateDeckName('Zoo Warlock'), '动物园术');
+});
+
 test('keeps new archetype aliases within exact token boundaries', () => {
   assert.equal(translateDeckName('Dragon Hunter'), '龙猎');
   assert.equal(translateDeckName('Dragon Tamerish Hunter'), '龙Tamerish猎');

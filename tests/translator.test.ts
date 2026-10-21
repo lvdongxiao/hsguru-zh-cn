@@ -63,6 +63,23 @@ test('translates the current deck statistics period', () => {
   );
 });
 
+test('translates the Black Empire period and expansion with exact matching', () => {
+  for (const source of ['Black Empire', 'Reign of the Black Empire']) {
+    assert.equal(translateText(source, siteDictionary), '黑暗帝国的统治');
+    assert.equal(
+      translateText(`  ${source}\n`, siteDictionary),
+      '  黑暗帝国的统治\n',
+    );
+  }
+  for (const source of [
+    'black empire',
+    'Black Empire decks',
+    'Black Empire!',
+  ]) {
+    assert.equal(translateText(source, siteDictionary), source);
+  }
+});
+
 test('translates the signed-out player stats page', () => {
   assert.equal(
     translateText('You need to log in to view this page', siteDictionary),
