@@ -80,6 +80,15 @@ test('translates the Black Empire period and expansion with exact matching', () 
   }
 });
 
+test('translates the post-ban statistics period with exact matching', () => {
+  assert.equal(translateText('Bans', siteDictionary), '禁牌后');
+  assert.equal(translateText('  Bans\n', siteDictionary), '  禁牌后\n');
+
+  for (const source of ['Ban', 'bans', 'Banshee', 'Bans applied']) {
+    assert.equal(translateText(source, siteDictionary), source);
+  }
+});
+
 test('translates the signed-out player stats page', () => {
   assert.equal(
     translateText('You need to log in to view this page', siteDictionary),

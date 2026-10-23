@@ -227,6 +227,7 @@ export const dictionary: Readonly<Record<string, string>> = {
   Restoration: '艾泽拉斯复兴',
   Timeways: '穿越时间流',
   'Black Empire': '黑暗帝国的统治',
+  Bans: '禁牌后',
   "Azeroth's Most Wanted": '艾泽拉斯头号通缉',
   'Day of Rebirth': '重生之日',
   'Emerald Dream': '漫游翡翠梦境',
