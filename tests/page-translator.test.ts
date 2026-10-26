@@ -37,6 +37,62 @@ function setupDOM(t: TestContext, markup: string, path = '/decks') {
   return { document, translator, Event: dom.window.Event };
 }
 
+test('translates and restores homepage badges, tooltips and dynamically added streamers', (t) => {
+  const { document, translator } = setupDOM(
+    t,
+    `<main><div title="Peaked by Maxiebon1234"><svg></svg><span>Peak: Maxiebon1234</span></div>
+    <span class="legend-rank">13</span>
+    <div title="First streamed by pacifist_hs"><span>1st: pacifist_hs</span></div>
+    <a href="/streamer-decks?deck_id=42689082" title="Streamed by 6 streamers"><span>Streamed: 6</span></a></main>`,
+    '/',
+  );
+  const root = document.querySelector('main')!;
+  const originalMarkup = root.innerHTML;
+  translator.translate(root);
+  assert.equal(
+    root.querySelector('div span')!.textContent,
+    '最佳战绩：Maxiebon1234',
+  );
+  assert.equal(
+    root.querySelector('div')!.getAttribute('title'),
+    '最佳战绩由 Maxiebon1234 达成',
+  );
+  assert.equal(
+    root.querySelectorAll('div')[1].textContent,
+    '首播：pacifist_hs',
+  );
+  assert.equal(
+    root.querySelectorAll('div')[1].getAttribute('title'),
+    '最早使用此套牌直播的主播：pacifist_hs',
+  );
+  assert.equal(root.querySelector('.legend-rank')!.textContent, '13');
+  assert.equal(root.querySelector('a')!.textContent, '主播：6');
+  assert.equal(
+    root.querySelector('a')!.getAttribute('title'),
+    '已有 6 位主播使用此套牌直播',
+  );
+  assert.equal(
+    root.querySelector('a')!.getAttribute('href'),
+    '/streamer-decks?deck_id=42689082',
+  );
+  const translatedMarkup = root.innerHTML;
+  translator.translate(root);
+  assert.equal(root.innerHTML, translatedMarkup);
+
+  const added = document.createElement('div');
+  added.setAttribute('title', 'First streamed by 뀨효미');
+  added.textContent = '1st: 뀨효미';
+  root.append(added);
+  translator.translate(added);
+  assert.equal(added.textContent, '首播：뀨효미');
+  assert.equal(added.getAttribute('title'), '最早使用此套牌直播的主播：뀨효미');
+  translator.restore(root);
+  assert.equal(added.textContent, '1st: 뀨효미');
+  assert.equal(added.getAttribute('title'), 'First streamed by 뀨효미');
+  added.remove();
+  assert.equal(root.innerHTML, originalMarkup);
+});
+
 test('embeds three self-contained vector rune images and describes their counts', () => {
   for (const source of Object.values(runeImages)) {
     assert.ok(source.startsWith('data:image/svg+xml;charset=utf-8,'));
@@ -82,7 +138,10 @@ test('decorates deck titles without replacing their text node or altering site a
   assert.ok(
     [...icons.querySelectorAll('img')].every(
       (img) =>
-        img.getAttribute('alt') === '' && img.getAttribute('width') === '18',
+        img.getAttribute('alt') === '' &&
+        img.getAttribute('width') === '18' &&
+        img.style.width === 'max(18px, 1em)' &&
+        img.style.height === 'max(18px, 1em)',
     ),
   );
 

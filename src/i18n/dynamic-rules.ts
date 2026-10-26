@@ -138,6 +138,24 @@ export function translateDynamicText(
   if ((match = content.match(/^Games: ([\d,]+)$/))) {
     return `对局数：${match[1]}`;
   }
+  if ((match = content.match(/^Peak: (.+)$/))) {
+    return `最佳战绩：${match[1]}`;
+  }
+  if ((match = content.match(/^Peaked by (.+)$/))) {
+    return `最佳战绩由 ${match[1]} 达成`;
+  }
+  if ((match = content.match(/^1st: (.+)$/))) {
+    return `首播：${match[1]}`;
+  }
+  if ((match = content.match(/^First streamed by (.+)$/))) {
+    return `最早使用此套牌直播的主播：${match[1]}`;
+  }
+  if ((match = content.match(/^Streamed: (\d+)$/))) {
+    return `主播：${match[1]}`;
+  }
+  if ((match = content.match(/^Streamed by (\d+) streamers?$/))) {
+    return `已有 ${match[1]} 位主播使用此套牌直播`;
+  }
   if ((match = content.match(/^Peaked By: (.+)$/))) {
     return `最高排名玩家：${match[1]}`;
   }

@@ -43,8 +43,9 @@ export function createDeckRuneIcons(runes: readonly DeckRune[]): HTMLElement {
     image.width = 18;
     image.height = 18;
     Object.assign(image.style, {
-      width: '18px',
-      height: '18px',
+      // 大标题随字号放大；紧凑列表仍保留至少 18px，确保符文可辨认。
+      width: 'max(18px, 1em)',
+      height: 'max(18px, 1em)',
       maxWidth: 'none',
       display: 'block',
       flexShrink: '0',

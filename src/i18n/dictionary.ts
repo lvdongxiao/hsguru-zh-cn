@@ -382,6 +382,7 @@ export const dictionary: Readonly<Record<string, string>> = {
   'Card Stats': '卡牌数据',
   'Card Stats (Mulligan)': '卡牌数据（起手留牌）',
   'Deck Stats': '套牌数据',
+  'Track Games': '记录对局',
   'Archetype Card Stats': '套牌类型卡牌数据',
   Card: '卡牌',
   'Min Mull Count': '最少起手样本数',

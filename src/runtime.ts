@@ -85,10 +85,10 @@ export function installHsguruZhCn(): void {
     }
 
     translationMenuId = GM_registerMenuCommand(
-      isEnabled ? '切换为英文' : '切换为中文',
+      isEnabled ? '🌐 切换为英文' : '🌐 切换为中文',
       toggleTranslation,
     );
-    updateCardsMenuId = GM_registerMenuCommand('更新卡牌翻译数据', () => {
+    updateCardsMenuId = GM_registerMenuCommand('🔄 更新卡牌翻译数据', () => {
       void updateCardTranslations(true);
     });
   }

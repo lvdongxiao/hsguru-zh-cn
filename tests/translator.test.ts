@@ -482,6 +482,43 @@ test('translates dynamic filter labels', () => {
   assert.equal(translateText('VS Death Knight', dictionary), '对阵死亡骑士');
 });
 
+test('translates homepage deck badges and tooltips while preserving streamer names', () => {
+  const expected: Readonly<Record<string, string>> = {
+    'Peak: Maxiebon1234': '最佳战绩：Maxiebon1234',
+    'Peaked by Maxiebon1234': '最佳战绩由 Maxiebon1234 达成',
+    '1st: pacifist_hs': '首播：pacifist_hs',
+    'First streamed by pacifist_hs': '最早使用此套牌直播的主播：pacifist_hs',
+    'Peak: 뀨효미': '最佳战绩：뀨효미',
+    '1st: No Hands #1234': '首播：No Hands #1234',
+    'Streamed: 6': '主播：6',
+    'Streamed by 6 streamers': '已有 6 位主播使用此套牌直播',
+    'Streamed by 1 streamers': '已有 1 位主播使用此套牌直播',
+    'Streamed by 1 streamer': '已有 1 位主播使用此套牌直播',
+  };
+  for (const [english, chinese] of Object.entries(expected)) {
+    assert.equal(translateText(english, siteDictionary), chinese);
+    assert.equal(
+      translateText(` \n${english}\t `, siteDictionary),
+      ` \n${chinese}\t `,
+    );
+  }
+  for (const text of [
+    'Peak:',
+    '1st:',
+    'Peaked by',
+    'First streamed by',
+    'peak: foo',
+    'See Peak: foo',
+    'Streamed: many',
+    'Streamed: 6 times',
+    'Streamed by 6 viewers',
+    'Streamed by 6 streamers today',
+    '13',
+  ]) {
+    assert.equal(translateText(text, siteDictionary), text);
+  }
+});
+
 test('translates dynamic stream metadata', () => {
   assert.equal(translateText('# Streamed: 4', dictionary), '直播次数：4');
   assert.equal(
@@ -670,6 +707,17 @@ test('translates deck detail page controls and statistics', () => {
 
   for (const [english, chinese] of Object.entries(expected)) {
     assert.equal(translateText(english, siteDictionary), chinese);
+  }
+});
+
+test('translates the Track Games button with exact matching', () => {
+  assert.equal(translateText('Track Games', siteDictionary), '记录对局');
+  assert.equal(
+    translateText(' \nTrack Games\t ', siteDictionary),
+    ' \n记录对局\t ',
+  );
+  for (const text of ['Track Game', 'track games', 'Track Games Now']) {
+    assert.equal(translateText(text, siteDictionary), text);
   }
 });
 
