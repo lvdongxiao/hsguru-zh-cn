@@ -323,6 +323,26 @@ function translateRuneToken(token: string): string | undefined {
   return [...token].map((rune) => runes[rune]).join('');
 }
 
+export type DeckRune = 'B' | 'F' | 'U';
+
+/** 仅识别套牌名开头（可带 XL / HL / STD）的完整符文组合。 */
+export function splitDeckRunePrefix(
+  source: string,
+): { runes: DeckRune[]; name: string } | undefined {
+  const normalized = source.trim().replace(/\s+/g, ' ');
+  const match = normalized.match(/^((?:(?:XL|HL|STD) )*)([BFU]{1,4}) (.+)$/);
+  if (!match) return undefined;
+  return {
+    runes: [...match[2]] as DeckRune[],
+    name: `${match[1]}${match[3]}`,
+  };
+}
+
+/** 复制套牌标题时省略符文组合，保留体系、职业及其他名称标记。 */
+export function translateDeckNameWithoutRunes(source: string): string {
+  return translateDeckName(splitDeckRunePrefix(source)?.name ?? source);
+}
+
 /** 将 HSGuru 的组合式英文卡组名转换为常用中文简称。 */
 export function translateDeckName(source: string): string {
   let remaining = source.trim().replace(/\s+/g, ' ');

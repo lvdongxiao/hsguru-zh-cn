@@ -4,9 +4,11 @@ import {
   translateCardLabelByHref,
   translateCardTextByHref,
 } from './card-text';
-import { translateDeckName } from './deck-names';
+import { splitDeckRunePrefix, translateDeckName } from './deck-names';
 import { translateDurationValue } from './dynamic-rules';
+import { createDeckRuneIcons, runeIconSelector } from './rune-icons';
 import {
+  replacePreservingWhitespace,
   translateCountryOption,
   translateText,
   type TranslationDictionary,
@@ -115,6 +117,8 @@ export class PageTranslator {
     Text,
     { original: string; translated: string }
   >();
+  readonly #runeIcons = new WeakMap<Text, HTMLElement>();
+  readonly #runeOwners = new WeakMap<Element, Text>();
   readonly #translatedAttributes = new WeakMap<
     Element,
     Map<
@@ -138,6 +142,8 @@ export class PageTranslator {
     }
 
     if (!(root instanceof Element || root instanceof Document)) return;
+    this.#pruneRuneIcons(root);
+    if (root instanceof Element && root.closest(runeIconSelector)) return;
     if (root instanceof Element) this.#translateElementAttributes(root);
 
     const walker = document.createTreeWalker(
@@ -160,6 +166,8 @@ export class PageTranslator {
     }
 
     if (!(root instanceof Element || root instanceof Document)) return;
+    // 先移除装饰，保留原 Text 节点供下方遍历恢复。
+    for (const icons of root.querySelectorAll(runeIconSelector)) icons.remove();
     if (root instanceof Element) this.#restoreElementAttributes(root);
 
     const walker = document.createTreeWalker(
@@ -177,12 +185,27 @@ export class PageTranslator {
 
   #translateTextNode(node: Text): void {
     const parent = node.parentElement;
-    if (!parent || ignoredElementNames.has(parent.tagName)) return;
+    if (
+      !parent ||
+      ignoredElementNames.has(parent.tagName) ||
+      parent.closest(runeIconSelector)
+    )
+      return;
 
     const previous = this.#translatedText.get(node);
-    if (previous && node.data === previous.translated) return;
+    const icons = this.#runeIcons.get(node);
+    if (
+      previous &&
+      node.data === previous.translated &&
+      (!icons || (icons.parentNode === parent && icons.nextSibling === node))
+    )
+      return;
 
-    const original = node.data;
+    const original =
+      previous && node.data === previous.translated
+        ? previous.original
+        : node.data;
+    this.#removeRuneIcons(node);
     const resources = this.#resources;
     let translated = translateText(original, resources.dictionary);
     if (
@@ -225,8 +248,21 @@ export class PageTranslator {
               );
       }
     }
-    if (translated === original && isDeckNameNode(node)) {
-      translated = translateDeckName(original);
+    if (isDeckNameNode(node)) {
+      const prefix = splitDeckRunePrefix(original);
+      // 原生 select 只能使用纯文本；HSGuru 的自定义菜单可正常展示图标。
+      if (prefix && !parent.closest('select, option')) {
+        translated = replacePreservingWhitespace(
+          original,
+          translateDeckName(prefix.name),
+        );
+        const runeIcons = createDeckRuneIcons(prefix.runes);
+        parent.insertBefore(runeIcons, node);
+        this.#runeIcons.set(node, runeIcons);
+        this.#runeOwners.set(runeIcons, node);
+      } else if (translated === original) {
+        translated = translateDeckName(original);
+      }
     }
     if (translated === original) return;
 
@@ -235,13 +271,39 @@ export class PageTranslator {
   }
 
   #restoreTextNode(node: Text): void {
+    this.#removeRuneIcons(node);
     const previous = this.#translatedText.get(node);
     if (previous !== undefined && node.data === previous.translated) {
       node.data = previous.original;
     }
+    this.#translatedText.delete(node);
+  }
+
+  #removeRuneIcons(node: Text): void {
+    const icons = this.#runeIcons.get(node);
+    icons?.remove();
+    if (icons) this.#runeOwners.delete(icons);
+    this.#runeIcons.delete(node);
+  }
+
+  #pruneRuneIcons(root: Element | Document): void {
+    const groups = [...root.querySelectorAll(runeIconSelector)];
+    if (root instanceof Element && root.matches(runeIconSelector)) {
+      groups.push(root);
+    }
+    for (const icons of groups) {
+      const owner = this.#runeOwners.get(icons);
+      if (
+        owner &&
+        (owner.parentNode !== icons.parentNode || icons.nextSibling !== owner)
+      ) {
+        icons.remove();
+      }
+    }
   }
 
   #translateElementAttributes(element: Element): void {
+    if (element.closest(runeIconSelector)) return;
     // textarea 的正文不应改写，但 placeholder 等界面属性仍需翻译。
     if (
       ignoredElementNames.has(element.tagName) &&

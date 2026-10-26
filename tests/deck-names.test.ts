@@ -1,6 +1,10 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { translateDeckName } from '../src/i18n/deck-names';
+import {
+  splitDeckRunePrefix,
+  translateDeckName,
+  translateDeckNameWithoutRunes,
+} from '../src/i18n/deck-names';
 
 test('combines an archetype and class into a conventional Chinese deck name', () => {
   assert.equal(translateDeckName('Face Hunter'), '打脸猎');
@@ -27,6 +31,46 @@ test('translates Sneaky archetypes with exact token boundaries', () => {
 test('supports Death Knight rune prefixes', () => {
   assert.equal(translateDeckName('BUU Egg DK'), '血邪邪蛋DK');
   assert.equal(translateDeckName('BBUU Chef Druid'), '血血邪邪主厨德');
+});
+
+test('separates complete rune prefixes while retaining deck modifiers', () => {
+  assert.deepEqual(splitDeckRunePrefix('  BUU\tEgg DK\n'), {
+    runes: ['B', 'U', 'U'],
+    name: 'Egg DK',
+  });
+  assert.deepEqual(splitDeckRunePrefix('XL HL BBF Control DK Wild'), {
+    runes: ['B', 'B', 'F'],
+    name: 'XL HL Control DK Wild',
+  });
+  assert.deepEqual(splitDeckRunePrefix('BBUU Chef Druid'), {
+    runes: ['B', 'B', 'U', 'U'],
+    name: 'Chef Druid',
+  });
+  for (const source of [
+    'BUU',
+    'BUUUU Egg DK',
+    'BUUish Egg DK',
+    'buu Egg DK',
+    'Blood DK',
+    'Frost DK',
+    'Unholy DK',
+    'Buff Paladin',
+    "C'Thun DK",
+    'Egg BUU DK',
+  ])
+    assert.equal(splitDeckRunePrefix(source), undefined);
+});
+
+test('omits only rune prefixes from copied deck names', () => {
+  assert.equal(translateDeckNameWithoutRunes('BUU Egg DK'), '蛋DK');
+  assert.equal(
+    translateDeckNameWithoutRunes('XL BFU Rainbow DK Wild'),
+    'XL彩虹DK 狂野模式',
+  );
+  assert.equal(translateDeckNameWithoutRunes('血DK'), '血DK');
+  assert.equal(translateDeckNameWithoutRunes('Blood DK'), '血DK');
+  assert.equal(translateDeckNameWithoutRunes('Banshee DK'), 'BansheeDK');
+  assert.equal(translateDeckNameWithoutRunes('BUUish Egg DK'), 'BUUish蛋DK');
 });
 
 test('translates newly added deck and opponent filter archetypes', () => {

@@ -47,6 +47,54 @@ test('translates the compact text copied by the HSGuru deck button', () => {
   );
 });
 
+test('drops rune prefixes only from the copied title and preserves the full deck payload', () => {
+  for (const name of ['BUU Egg DK', 'BBF Egg DK', 'BFU Egg DK', 'FFF Egg DK']) {
+    const source = hsguruCopiedDeck.replace('Zee Shaman', name);
+    assert.equal(translateCopiedDeckText(source), source.replace(name, '蛋DK'));
+    const withCrLf = `\uFEFF  ### ${name}  \r\n# Class: Death Knight\r\n# 2x (1) BUU Example\r\n${hsguruCopiedDeck.split('\n')[1]}\r\n`;
+    assert.equal(
+      translateCopiedDeckText(withCrLf),
+      withCrLf.replace(name, '蛋DK'),
+    );
+  }
+  assert.equal(
+    translateCopiedDeckText('### BUU Egg DK\nordinary markdown'),
+    '### BUU Egg DK\nordinary markdown',
+  );
+});
+
+test('copies the same rune-free title from original and decorated DOM names', () => {
+  const code = hsguruCopiedDeck.split('\n')[1];
+  const url = 'https://www.hsguru.com/deck/123';
+  for (const name of ['BUU Egg DK', '蛋DK']) {
+    assert.equal(
+      createHsguruDeckCopyText(name, code, url),
+      `### 蛋DK\n${code}\n### You can view this deck at ${url}`,
+    );
+  }
+  assert.equal(
+    createHsguruDeckCopyText('XL BUU Egg DK', code, url).split('\n')[0],
+    '### XL蛋DK',
+  );
+});
+
+test('the clipboard wrapper strips runes only while translation is enabled', async () => {
+  const source = hsguruCopiedDeck.replace('Zee Shaman', 'BUU Egg DK');
+  const writes: string[] = [];
+  const clipboard = {
+    async writeText(text: string) {
+      writes.push(text);
+    },
+  };
+  let enabled = true;
+  installDeckClipboardTranslation(clipboard, () => enabled);
+  await clipboard.writeText(source);
+  enabled = false;
+  await clipboard.writeText(source);
+  assert.equal(writes[0], source.replace('BUU Egg DK', '蛋DK'));
+  assert.equal(writes[1], source);
+});
+
 test('translates deckviewer ClipboardJS text for a dynamically added deck', () => {
   const deckviewerText = [
     '### Clone Mech Paladin',

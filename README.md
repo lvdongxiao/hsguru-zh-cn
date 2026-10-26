@@ -11,6 +11,7 @@
 - 翻译登录后的用户菜单、个人资料与设置、套牌表、个人对局数据、回放、群组和收藏页面；
 - 翻译玩家数据、炉石电竞积分及各赛区排行榜，包括赛季、赛区、国家和联动筛选项；
 - 翻译 HSGuru 套牌名称，并保留 `XL` 等约定俗成的英文标记；
+- 将套牌名称中的 `BUU` 等符文组合显示为游戏风格的矢量符文图标，复制时省略符文组合；
 - 从 HearthstoneJSON 加载完整的简体中文卡牌名称、卡牌文本、趣味描述、关键词和附属卡牌数据；
 - 将卡牌详情图、套牌悬停预览图等替换为简体中文卡图；
 - 翻译复制到剪贴板的套牌名称，包括动态添加到套牌查看器中的套牌；
@@ -151,6 +152,7 @@ npm run check
 
 ## 数据来源和声明
 
+- 死亡骑士符文图标参照暴雪官方[死亡骑士介绍](https://hearthstone.blizzard.com/en-us/news/23852696)中的游戏原图重绘为 SVG，简化了小尺寸下的纹理，内嵌于脚本中；
 - 卡牌数据及渲染图通过 [HearthstoneJSON](https://hearthstonejson.com/) 获取；
 - 早期部分界面文案和套牌名称翻译参考了 Greasy Fork 上的 [HSGuru 中文美化脚本](https://greasyfork.org/zh-CN/scripts/555065-hsguru-%E4%B8%AD%E6%96%87%E7%BE%8E%E5%8C%96%E8%84%9A%E6%9C%AC)（脚本署名：深海之鱼）；
 - HSGuru、HearthstoneJSON、Hearthstone 及相关名称、商标和卡牌素材归各自权利人所有；

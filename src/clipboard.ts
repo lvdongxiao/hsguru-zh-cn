@@ -1,4 +1,4 @@
-import { translateDeckName } from './i18n/deck-names';
+import { translateDeckNameWithoutRunes } from './i18n/deck-names';
 
 interface ClipboardWriter {
   writeText(text: string): Promise<void>;
@@ -16,7 +16,7 @@ export function translateCopiedDeckText(source: string): string {
   return source.replace(
     /^(\uFEFF?[ \t]*###[ \t]+)(.*?)([ \t]*)(\r?)$/m,
     (_line, prefix: string, deckName: string, trailing: string, cr: string) =>
-      `${prefix}${translateDeckName(deckName)}${trailing}${cr}`,
+      `${prefix}${translateDeckNameWithoutRunes(deckName)}${trailing}${cr}`,
   );
 }
 
@@ -26,15 +26,23 @@ export function createHsguruDeckCopyText(
   deckUrl: string,
 ): string {
   return [
-    `### ${translateDeckName(deckName)}`,
+    `### ${translateDeckNameWithoutRunes(deckName)}`,
     deckCode,
     `### You can view this deck at ${deckUrl}`,
   ].join('\n');
 }
 
 function extractDeckCode(heading: Element): string | undefined {
-  const matches = heading.textContent?.match(/[A-Za-z0-9+/]{40,}={0,2}/g);
-  return matches?.sort((a, b) => b.length - a.length)[0];
+  // 按文本节点查找，避免无空格相邻的“DK”和套牌代码被连成一个匹配。
+  const walker = document.createTreeWalker(heading, NodeFilter.SHOW_TEXT);
+  const matches: string[] = [];
+  let node: Node | null;
+  while ((node = walker.nextNode())) {
+    matches.push(
+      ...(node.textContent?.match(/[A-Za-z0-9+/]{40,}={0,2}/g) ?? []),
+    );
+  }
+  return matches.sort((a, b) => b.length - a.length)[0];
 }
 
 function findDeckHeading(trigger: HTMLElement): Element | undefined {

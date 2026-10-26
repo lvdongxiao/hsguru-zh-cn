@@ -197,7 +197,8 @@ export function installHsguruZhCn(): void {
       for (const mutation of mutations) {
         if (
           mutation.type === 'characterData' ||
-          mutation.type === 'attributes'
+          mutation.type === 'attributes' ||
+          (mutation.type === 'childList' && mutation.removedNodes.length > 0)
         ) {
           candidates.push(mutation.target);
         }
