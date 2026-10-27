@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         HSGuru 中文助手
 // @namespace    https://github.com/lvdongxiao/hsguru-zh-cn
-// @version      26.3.0
+// @version      26.3.1
 // @description  为 HSGuru 网站提供简体中文界面
 // @author       lvdongxiao
 // @homepageURL  https://github.com/lvdongxiao/hsguru-zh-cn
@@ -441,6 +441,18 @@
     };
     return [...token].map((rune) => runes[rune]).join("");
   }
+  function splitDeckRunePrefix(source) {
+    const normalized = source.trim().replace(/\s+/g, " ");
+    const match = normalized.match(/^((?:(?:XL|HL|STD) )*)([BFU]{1,4}) (.+)$/);
+    if (!match) return void 0;
+    return {
+      runes: [...match[2]],
+      name: `${match[1]}${match[3]}`
+    };
+  }
+  function translateDeckNameWithoutRunes(source) {
+    return translateDeckName(splitDeckRunePrefix(source)?.name ?? source);
+  }
   function translateDeckName(source) {
     let remaining = source.trim().replace(/\s+/g, " ");
     if (!remaining) return source;
@@ -526,6 +538,26 @@
     if (match = content.match(/^(\d+) out of (\d+)$/)) {
       return `已选 ${match[1]} 张，最多 ${match[2]} 张`;
     }
+    if (match = content.match(/^Choose from (\d+) deck archetypes?$/)) {
+      return `从 ${match[1]} 种套牌类型中选择`;
+    }
+    if (match = content.match(/^Go to (.+)$/)) {
+      const deckName = translateDeckName(match[1]);
+      if (deckName !== match[1]) return `查看${deckName}`;
+    }
+    if (match = content.match(
+      /^(.+?) versus (.+?) - (\d+(?:\.\d+)?%) ([\d,]+) games?$/
+    )) {
+      const deckName = translateDeckName(match[1]);
+      const opponent = translateDeckName(match[2]);
+      if (deckName !== match[1] || opponent !== match[2]) {
+        return `${deckName} 对阵 ${opponent}：胜率 ${match[3]}，${match[4]} 局`;
+      }
+    }
+    if ((match = content.match(/^(.+?) - ([\d,]+) games?$/)) && !match[1].includes(" versus ")) {
+      const deckName = translateDeckName(match[1]);
+      if (deckName !== match[1]) return `${deckName}：${match[2]} 局`;
+    }
     if (match = content.match(/^Show ([\d,]+)$/)) {
       return `显示 ${match[1]} 条`;
     }
@@ -601,6 +633,24 @@
     }
     if (match = content.match(/^Games: ([\d,]+)$/)) {
       return `对局数：${match[1]}`;
+    }
+    if (match = content.match(/^Peak: (.+)$/)) {
+      return `最佳战绩：${match[1]}`;
+    }
+    if (match = content.match(/^Peaked by (.+)$/)) {
+      return `最佳战绩由 ${match[1]} 达成`;
+    }
+    if (match = content.match(/^1st: (.+)$/)) {
+      return `首播：${match[1]}`;
+    }
+    if (match = content.match(/^First streamed by (.+)$/)) {
+      return `最早使用此套牌直播的主播：${match[1]}`;
+    }
+    if (match = content.match(/^Streamed: (\d+)$/)) {
+      return `主播：${match[1]}`;
+    }
+    if (match = content.match(/^Streamed by (\d+) streamers?$/)) {
+      return `已有 ${match[1]} 位主播使用此套牌直播`;
     }
     if (match = content.match(/^Peaked By: (.+)$/)) {
       return `最高排名玩家：${match[1]}`;
@@ -682,6 +732,138 @@
     return `${match[1]}${translated.join("、")}${match[3]}`;
   }
 
+  // src/data/rune-images.ts
+  var runeSvgSources = {
+    B: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 135 135">
+  <defs>
+    <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#fff4b2"/><stop offset=".3" stop-color="#d8ad49"/>
+      <stop offset=".53" stop-color="#8b5126"/><stop offset=".78" stop-color="#f5d783"/>
+      <stop offset="1" stop-color="#68401e"/>
+    </linearGradient>
+    <linearGradient id="ruby" x1=".15" y1="0" x2=".8" y2="1">
+      <stop stop-color="#fa6951"/><stop offset=".48" stop-color="#c92537"/>
+      <stop offset="1" stop-color="#631839"/>
+    </linearGradient>
+  </defs>
+  <path d="M67.5 2 133 67.5 67.5 133 2 67.5Z" fill="#241d24" stroke="#111b21" stroke-width="3"/>
+  <path d="M67.5 8 127 67.5 67.5 127 8 67.5Z" fill="url(#gold)"/>
+  <path d="M67.5 17 118 67.5 67.5 118 17 67.5Z" fill="#49312c" stroke="#fff2ad" stroke-width="1.5"/>
+  <path d="M67.5 23 112 67.5 67.5 112 23 67.5Z" fill="url(#ruby)" stroke="#ffad68" stroke-width="2"/>
+  <path d="M67.5 23 23 67.5 48 64Z" fill="#ff9a70" opacity=".45"/>
+  <path d="m67.5 23 44.5 44.5-29-8Z" fill="#ed4a45" opacity=".6"/>
+  <path d="m23 67.5 44.5 44.5-17-27Z" fill="#67213b" opacity=".6"/>
+  <path d="M67.5 37C64 51 49 64 49 77c0 24 37 24 37 0 0-13-15-26-18.5-40Z" fill="#351934" stroke="#ec5862" stroke-width="2.5"/>
+  <path d="M65 51c-3 9-10 17-10 26 0 10 5 15 12 16" fill="none" stroke="#7c2c51" stroke-width="3" stroke-linecap="round"/>
+  <path d="M16 67.5 67.5 16 119 67.5" fill="none" stroke="#fff2b8" stroke-width="2" stroke-linejoin="round"/>
+</svg>`,
+    F: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 135 135">
+  <defs>
+    <linearGradient id="gold" x1="0" y1="0" x2=".8" y2="1">
+      <stop stop-color="#fff2a8"/><stop offset=".32" stop-color="#b98130"/>
+      <stop offset=".56" stop-color="#fff0a1"/><stop offset="1" stop-color="#745028"/>
+    </linearGradient>
+    <radialGradient id="ice" cx=".4" cy=".3" r=".8">
+      <stop stop-color="#49e3ff"/><stop offset=".48" stop-color="#1e99d9"/>
+      <stop offset="1" stop-color="#15528c"/>
+    </radialGradient>
+  </defs>
+  <circle cx="67.5" cy="67.5" r="59" fill="#17262b"/>
+  <circle cx="67.5" cy="67.5" r="55" fill="url(#gold)" stroke="#5e412b" stroke-width="2"/>
+  <circle cx="67.5" cy="67.5" r="47" fill="#352b35" stroke="#ffeaa3" stroke-width="1.5"/>
+  <circle cx="67.5" cy="67.5" r="43" fill="url(#ice)" stroke="#7cf1f6" stroke-width="3"/>
+  <circle cx="67.5" cy="67.5" r="37" fill="none" stroke="#98f3ff" stroke-width="1.3" opacity=".65"/>
+  <g fill="#202b58" stroke="#4dcbed" stroke-width="1.5" stroke-linejoin="round">
+    <path d="M67.5 35C53 43 51 52 61 61l6.5 6.5L74 61c10-9 8-18-6.5-26Z"/>
+    <path d="M100 67.5C92 53 83 51 74 61l-6.5 6.5L74 74c9 10 18 8 26-6.5Z"/>
+    <path d="M67.5 100C82 92 84 83 74 74l-6.5-6.5L61 74c-10 9-8 18 6.5 26Z"/>
+    <path d="M35 67.5C43 82 52 84 61 74l6.5-6.5L61 61c-9-10-18-8-26 6.5Z"/>
+  </g>
+  <path d="M29 39a48 48 0 0 1 61-17" fill="none" stroke="#fff3b5" stroke-width="3" stroke-linecap="round"/>
+  <path d="M104 97a48 48 0 0 1-34 18" fill="none" stroke="#bd852d" stroke-width="3" stroke-linecap="round"/>
+</svg>`,
+    U: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 135 135">
+  <defs>
+    <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#fff6bb"/><stop offset=".3" stop-color="#d5ac4d"/>
+      <stop offset=".6" stop-color="#805329"/><stop offset=".82" stop-color="#ebd287"/>
+      <stop offset="1" stop-color="#63452a"/>
+    </linearGradient>
+    <radialGradient id="venom" cx=".35" cy=".2" r="1">
+      <stop stop-color="#83ce35"/><stop offset=".55" stop-color="#3c8e3a"/>
+      <stop offset="1" stop-color="#1b4e39"/>
+    </radialGradient>
+  </defs>
+  <path d="m21 20 94-1 1 96-95 1Z" fill="#212a23" stroke="#132029" stroke-width="3"/>
+  <path d="M25 24h86v87H25Z" fill="url(#gold)"/>
+  <path d="m25 24 11 11h64l11-11Z" fill="#fff0a5"/>
+  <path d="m25 24 11 11v65l-11 11Z" fill="#d8b65b"/>
+  <path d="m111 24-11 11v65l11 11Z" fill="#69462a"/>
+  <path d="M35 34h66v67H35Z" fill="url(#venom)" stroke="#bdf263" stroke-width="2.5"/>
+  <path d="M40 39h56v57H40Z" fill="none" stroke="#2a5c35" stroke-width="2"/>
+  <path d="M68 44c-16-1-25 8-25 21 0 8 3 13 9 17v14h9V85h6v11h7V85h6v11h6V81c6-4 8-10 8-18 0-12-10-20-26-19Z" fill="#243b44" stroke="#9fdd43" stroke-width="2.5" stroke-linejoin="round"/>
+  <path d="m50 61 14 5-5 8-8-4Zm35 0-14 5 5 8 8-4ZM67.5 72l-5 8h10Z" fill="#91d443"/>
+  <path d="M51 51c8-6 21-7 31-1" fill="none" stroke="#3c6260" stroke-width="2" stroke-linecap="round"/>
+  <path d="M30 27h78M28 29v77" fill="none" stroke="#fff7ca" stroke-width="1.5" opacity=".75"/>
+</svg>`
+  };
+  var svgDataUrl = (source) => `data:image/svg+xml;charset=utf-8,${encodeURIComponent(source)}`;
+  var runeImages = {
+    B: svgDataUrl(runeSvgSources.B),
+    F: svgDataUrl(runeSvgSources.F),
+    U: svgDataUrl(runeSvgSources.U)
+  };
+
+  // src/i18n/rune-icons.ts
+  var runeIconSelector = "[data-hsguru-zh-runes]";
+  function describeDeckRunes(runes) {
+    const names = {
+      B: "鲜血",
+      F: "冰霜",
+      U: "邪恶"
+    };
+    return ["B", "F", "U"].flatMap((rune) => {
+      const count = runes.filter((item) => item === rune).length;
+      return count ? [`${names[rune]} ×${count}`] : [];
+    }).join("、");
+  }
+  function createDeckRuneIcons(runes) {
+    const group = document.createElement("span");
+    group.setAttribute("data-hsguru-zh-runes", "");
+    group.setAttribute("role", "img");
+    const description = describeDeckRunes(runes);
+    group.setAttribute("aria-label", description);
+    group.setAttribute("title", description);
+    Object.assign(group.style, {
+      display: "inline-flex",
+      alignItems: "center",
+      verticalAlign: "middle",
+      gap: "0",
+      marginInlineEnd: "3px",
+      lineHeight: "0",
+      whiteSpace: "nowrap"
+    });
+    for (const rune of runes) {
+      const image = document.createElement("img");
+      image.src = runeImages[rune];
+      image.alt = "";
+      image.setAttribute("aria-hidden", "true");
+      image.width = 18;
+      image.height = 18;
+      Object.assign(image.style, {
+        // 大标题随字号放大；紧凑列表仍保留至少 18px，确保符文可辨认。
+        width: "max(18px, 1em)",
+        height: "max(18px, 1em)",
+        maxWidth: "none",
+        display: "block",
+        flexShrink: "0",
+        objectFit: "contain"
+      });
+      group.append(image);
+    }
+    return group;
+  }
+
   // src/i18n/page-translator.ts
   var ignoredElementNames = /* @__PURE__ */ new Set([
     "CODE",
@@ -714,8 +896,11 @@
       return true;
     }
     if (/^\/matchups\/?$/.test(window.location.pathname)) {
-      if (element.matches("table td.sticky-column")) return true;
-      if (element.matches('table th button[phx-value-sort_by^="opponent_"]')) {
+      if (element.closest("table td.sticky-column")) return true;
+      if (element.closest('table th button[phx-value-sort_by^="opponent_"]')) {
+        return true;
+      }
+      if (element.matches("#deck_archetype_modal .modal-card-body > p > span")) {
         return true;
       }
     }
@@ -754,6 +939,8 @@
   var PageTranslator = class {
     #resources;
     #translatedText = /* @__PURE__ */ new WeakMap();
+    #runeIcons = /* @__PURE__ */ new WeakMap();
+    #runeOwners = /* @__PURE__ */ new WeakMap();
     #translatedAttributes = /* @__PURE__ */ new WeakMap();
     constructor(resources) {
       this.#resources = resources;
@@ -767,6 +954,8 @@
         return;
       }
       if (!(root instanceof Element || root instanceof Document)) return;
+      this.#pruneRuneIcons(root);
+      if (root instanceof Element && root.closest(runeIconSelector)) return;
       if (root instanceof Element) this.#translateElementAttributes(root);
       const walker = document.createTreeWalker(
         root,
@@ -785,6 +974,7 @@
         return;
       }
       if (!(root instanceof Element || root instanceof Document)) return;
+      for (const icons of root.querySelectorAll(runeIconSelector)) icons.remove();
       if (root instanceof Element) this.#restoreElementAttributes(root);
       const walker = document.createTreeWalker(
         root,
@@ -799,10 +989,14 @@
     }
     #translateTextNode(node) {
       const parent = node.parentElement;
-      if (!parent || ignoredElementNames.has(parent.tagName)) return;
+      if (!parent || ignoredElementNames.has(parent.tagName) || parent.closest(runeIconSelector))
+        return;
       const previous = this.#translatedText.get(node);
-      if (previous && node.data === previous.translated) return;
-      const original = node.data;
+      const icons = this.#runeIcons.get(node);
+      if (previous && node.data === previous.translated && (!icons || icons.parentNode === parent && icons.nextSibling === node))
+        return;
+      const original = previous && node.data === previous.translated ? previous.original : node.data;
+      this.#removeRuneIcons(node);
       const resources = this.#resources;
       let translated = translateText(original, resources.dictionary);
       if (translated === original && parent.closest("#deck_stats_container table") && ["duration", "时长"].includes(
@@ -838,20 +1032,53 @@
           );
         }
       }
-      if (translated === original && isDeckNameNode(node)) {
-        translated = translateDeckName(original);
+      if (isDeckNameNode(node)) {
+        const prefix = splitDeckRunePrefix(original);
+        if (prefix && !parent.closest("select, option")) {
+          translated = replacePreservingWhitespace(
+            original,
+            translateDeckName(prefix.name)
+          );
+          const runeIcons = createDeckRuneIcons(prefix.runes);
+          parent.insertBefore(runeIcons, node);
+          this.#runeIcons.set(node, runeIcons);
+          this.#runeOwners.set(runeIcons, node);
+        } else if (translated === original) {
+          translated = translateDeckName(original);
+        }
       }
       if (translated === original) return;
       this.#translatedText.set(node, { original, translated });
       node.data = translated;
     }
     #restoreTextNode(node) {
+      this.#removeRuneIcons(node);
       const previous = this.#translatedText.get(node);
       if (previous !== void 0 && node.data === previous.translated) {
         node.data = previous.original;
       }
+      this.#translatedText.delete(node);
+    }
+    #removeRuneIcons(node) {
+      const icons = this.#runeIcons.get(node);
+      icons?.remove();
+      if (icons) this.#runeOwners.delete(icons);
+      this.#runeIcons.delete(node);
+    }
+    #pruneRuneIcons(root) {
+      const groups = [...root.querySelectorAll(runeIconSelector)];
+      if (root instanceof Element && root.matches(runeIconSelector)) {
+        groups.push(root);
+      }
+      for (const icons of groups) {
+        const owner = this.#runeOwners.get(icons);
+        if (owner && (owner.parentNode !== icons.parentNode || icons.nextSibling !== owner)) {
+          icons.remove();
+        }
+      }
     }
     #translateElementAttributes(element) {
+      if (element.closest(runeIconSelector)) return;
       if (ignoredElementNames.has(element.tagName) && element.tagName !== "TEXTAREA") {
         return;
       }
@@ -986,19 +1213,26 @@
     if (!deckMarkerPattern.test(source)) return source;
     return source.replace(
       /^(\uFEFF?[ \t]*###[ \t]+)(.*?)([ \t]*)(\r?)$/m,
-      (_line, prefix, deckName, trailing, cr) => `${prefix}${translateDeckName(deckName)}${trailing}${cr}`
+      (_line, prefix, deckName, trailing, cr) => `${prefix}${translateDeckNameWithoutRunes(deckName)}${trailing}${cr}`
     );
   }
   function createHsguruDeckCopyText(deckName, deckCode, deckUrl) {
     return [
-      `### ${translateDeckName(deckName)}`,
+      `### ${translateDeckNameWithoutRunes(deckName)}`,
       deckCode,
       `### You can view this deck at ${deckUrl}`
     ].join("\n");
   }
   function extractDeckCode(heading) {
-    const matches = heading.textContent?.match(/[A-Za-z0-9+/]{40,}={0,2}/g);
-    return matches?.sort((a, b) => b.length - a.length)[0];
+    const walker = document.createTreeWalker(heading, NodeFilter.SHOW_TEXT);
+    const matches = [];
+    let node;
+    while (node = walker.nextNode()) {
+      matches.push(
+        ...node.textContent?.match(/[A-Za-z0-9+/]{40,}={0,2}/g) ?? []
+      );
+    }
+    return matches.sort((a, b) => b.length - a.length)[0];
   }
   function findDeckHeading(trigger) {
     let ancestor = trigger.parentElement;
@@ -1162,6 +1396,7 @@
   var cacheKey = "hsguru-zh-cn:card-dictionary";
   var cacheLifetime = 7 * 24 * 60 * 60 * 1e3;
   var dataBaseUrl = "https://api.hearthstonejson.com/v1/latest";
+  var pendingNetworkLoad;
   function requestJson(url) {
     return new Promise((resolve, reject) => {
       GM_xmlhttpRequest({
@@ -1251,30 +1486,58 @@
       )
     );
   }
+  function isStringEntries(value) {
+    if (!Array.isArray(value)) return false;
+    for (const entry of value) {
+      if (!Array.isArray(entry) || entry.length !== 2 || typeof entry[0] !== "string" || typeof entry[1] !== "string") {
+        return false;
+      }
+    }
+    return true;
+  }
   function isValidCache(value) {
     if (!value || typeof value !== "object") return false;
     const cache = value;
-    return (cache.schemaVersion === 1 || cache.schemaVersion === 2 || cache.schemaVersion === 3 || cache.schemaVersion === 4 || cache.schemaVersion === 5 || cache.schemaVersion === 6) && typeof cache.updatedAt === "number" && Array.isArray(cache.entries);
+    return (cache.schemaVersion === 1 || cache.schemaVersion === 2 || cache.schemaVersion === 3 || cache.schemaVersion === 4 || cache.schemaVersion === 5 || cache.schemaVersion === 6) && typeof cache.updatedAt === "number" && Number.isFinite(cache.updatedAt) && cache.updatedAt >= 0 && isStringEntries(cache.entries) && [
+      cache.renderIdsByDbfId,
+      cache.namesByDbfId,
+      cache.textsByDbfId,
+      cache.flavorsByDbfId,
+      cache.keywordEntries
+    ].every((entries) => entries === void 0 || isStringEntries(entries));
+  }
+  function readCardCache() {
+    try {
+      const cached = GM_getValue(cacheKey);
+      return isValidCache(cached) ? cached : void 0;
+    } catch {
+      return void 0;
+    }
+  }
+  function localizationFromCache(cache, source) {
+    return {
+      dictionary: Object.fromEntries(cache.entries),
+      renderIdsByDbfId: Object.fromEntries(cache.renderIdsByDbfId ?? []),
+      namesByDbfId: Object.fromEntries(cache.namesByDbfId ?? []),
+      textsByDbfId: Object.fromEntries(cache.textsByDbfId ?? []),
+      flavorsByDbfId: Object.fromEntries(cache.flavorsByDbfId ?? []),
+      keywordDictionary: Object.fromEntries(cache.keywordEntries ?? []),
+      source
+    };
   }
   async function loadCardLocalization(forceRefresh = false) {
-    const cached = GM_getValue(cacheKey);
-    const validCache = isValidCache(cached) ? cached : void 0;
-    const cachedRenderIds = validCache?.renderIdsByDbfId;
-    const cachedNames = validCache?.namesByDbfId;
-    const cachedTexts = validCache?.textsByDbfId;
-    const cachedFlavors = validCache?.flavorsByDbfId;
-    const cachedKeywords = validCache?.keywordEntries;
-    if (!forceRefresh && validCache && Array.isArray(cachedRenderIds) && Array.isArray(cachedNames) && Array.isArray(cachedTexts) && Array.isArray(cachedFlavors) && Array.isArray(cachedKeywords) && Date.now() - validCache.updatedAt < cacheLifetime) {
-      return {
-        dictionary: Object.fromEntries(validCache.entries),
-        renderIdsByDbfId: Object.fromEntries(cachedRenderIds),
-        namesByDbfId: Object.fromEntries(cachedNames),
-        textsByDbfId: Object.fromEntries(cachedTexts),
-        flavorsByDbfId: Object.fromEntries(cachedFlavors),
-        keywordDictionary: Object.fromEntries(cachedKeywords),
-        source: "cache"
-      };
+    if (pendingNetworkLoad) return pendingNetworkLoad;
+    const validCache = readCardCache();
+    const cacheAge = validCache ? Date.now() - validCache.updatedAt : Infinity;
+    if (!forceRefresh && validCache && validCache.renderIdsByDbfId !== void 0 && validCache.namesByDbfId !== void 0 && validCache.textsByDbfId !== void 0 && validCache.flavorsByDbfId !== void 0 && validCache.keywordEntries !== void 0 && cacheAge >= 0 && cacheAge < cacheLifetime) {
+      return localizationFromCache(validCache, "cache");
     }
+    pendingNetworkLoad = fetchCardLocalization(validCache).finally(() => {
+      pendingNetworkLoad = void 0;
+    });
+    return pendingNetworkLoad;
+  }
+  async function fetchCardLocalization(validCache) {
     try {
       const [englishCards, chineseCards] = await Promise.all([
         requestJson(
@@ -1291,7 +1554,7 @@
       const namesByDbfId = buildCardNamesByDbfId(chineseCards);
       const textsByDbfId = buildCardTextsByDbfId(chineseCards);
       const flavorsByDbfId = buildCardFlavorsByDbfId(chineseCards);
-      GM_setValue(cacheKey, {
+      const nextCache = {
         schemaVersion: 6,
         updatedAt: Date.now(),
         entries: Object.entries(dictionary2),
@@ -1300,7 +1563,12 @@
         textsByDbfId: Object.entries(textsByDbfId),
         flavorsByDbfId: Object.entries(flavorsByDbfId),
         keywordEntries: Object.entries(keywordDictionary)
-      });
+      };
+      try {
+        GM_setValue(cacheKey, nextCache);
+      } catch (error) {
+        console.warn("[HSGuru 中文助手] 卡牌翻译数据缓存写入失败。", error);
+      }
       return {
         dictionary: dictionary2,
         renderIdsByDbfId,
@@ -1312,15 +1580,7 @@
       };
     } catch (error) {
       if (validCache) {
-        return {
-          dictionary: Object.fromEntries(validCache.entries),
-          renderIdsByDbfId: Object.fromEntries(cachedRenderIds ?? []),
-          namesByDbfId: Object.fromEntries(cachedNames ?? []),
-          textsByDbfId: Object.fromEntries(cachedTexts ?? []),
-          flavorsByDbfId: Object.fromEntries(cachedFlavors ?? []),
-          keywordDictionary: Object.fromEntries(cachedKeywords ?? []),
-          source: "stale-cache"
-        };
+        return localizationFromCache(validCache, "stale-cache");
       }
       throw error;
     }
@@ -1384,6 +1644,10 @@
     No: "否",
     All: "全部",
     "Select All": "全选",
+    "Choose Deck Archetype": "选择套牌类型",
+    "contains multiple deck archetypes. Select which one you want to view:": "包含多个套牌类型，请选择要查看的类型：",
+    "Close modal": "关闭窗口",
+    Cancel: "取消",
     Any: "任意",
     Latest: "最新",
     Default: "默认",
@@ -1541,6 +1805,7 @@
     Restoration: "艾泽拉斯复兴",
     Timeways: "穿越时间流",
     "Black Empire": "黑暗帝国的统治",
+    Bans: "禁牌后",
     "Azeroth's Most Wanted": "艾泽拉斯头号通缉",
     "Day of Rebirth": "重生之日",
     "Emerald Dream": "漫游翡翠梦境",
@@ -1686,6 +1951,7 @@
     "Card Stats": "卡牌数据",
     "Card Stats (Mulligan)": "卡牌数据（起手留牌）",
     "Deck Stats": "套牌数据",
+    "Track Games": "记录对局",
     "Archetype Card Stats": "套牌类型卡牌数据",
     Card: "卡牌",
     "Min Mull Count": "最少起手样本数",
@@ -1877,7 +2143,7 @@
     let translationResources = createTranslationResources(dictionary);
     const translator = new PageTranslator(translationResources);
     let cardRenderIdsByDbfId = {};
-    let hasLoadedCardLocalization = false;
+    let appliedCardLocalization;
     let isEnabled = localStorage.getItem(storageKey) !== "false";
     const originalDocumentLanguage = document.documentElement?.lang || "en";
     installChartLabelTranslation(
@@ -1929,10 +2195,10 @@
         GM_unregisterMenuCommand(updateCardsMenuId);
       }
       translationMenuId = GM_registerMenuCommand(
-        isEnabled ? "切换为英文" : "切换为中文",
+        isEnabled ? "🌐 切换为英文" : "🌐 切换为中文",
         toggleTranslation
       );
-      updateCardsMenuId = GM_registerMenuCommand("更新卡牌翻译数据", () => {
+      updateCardsMenuId = GM_registerMenuCommand("🔄 更新卡牌翻译数据", () => {
         void updateCardTranslations(true);
       });
     }
@@ -1977,18 +2243,23 @@
       }
       try {
         const cardLocalization = await loadCardLocalization(forceRefresh);
-        if (hasLoadedCardLocalization && isEnabled && document.documentElement) {
-          translator.restore(document.documentElement);
-          restoreCardImages(document.documentElement);
+        if (appliedCardLocalization !== cardLocalization) {
+          if (appliedCardLocalization && isEnabled && document.documentElement) {
+            translator.restore(document.documentElement);
+            restoreCardImages(document.documentElement);
+          }
+          translationResources = createTranslationResources(
+            dictionary,
+            cardLocalization
+          );
+          translator.replaceResources(translationResources);
+          cardRenderIdsByDbfId = cardLocalization.renderIdsByDbfId;
+          appliedCardLocalization = cardLocalization;
+          translatePage();
+          console.info(
+            `[HSGuru 中文助手] 已加载 ${Object.keys(cardLocalization.dictionary).length} 条卡牌翻译。`
+          );
         }
-        translationResources = createTranslationResources(
-          dictionary,
-          cardLocalization
-        );
-        translator.replaceResources(translationResources);
-        cardRenderIdsByDbfId = cardLocalization.renderIdsByDbfId;
-        hasLoadedCardLocalization = true;
-        translatePage();
         if (forceRefresh) {
           if (cardLocalization.source === "network") {
             const cardCount = Object.keys(cardLocalization.namesByDbfId).length;
@@ -2000,9 +2271,6 @@
             showCardUpdateNotice("更新失败，已继续使用原有缓存", "error");
           }
         }
-        console.info(
-          `[HSGuru 中文助手] 已加载 ${Object.keys(cardLocalization.dictionary).length} 条卡牌翻译。`
-        );
       } catch (error) {
         if (forceRefresh) {
           showCardUpdateNotice("卡牌翻译数据更新失败，请稍后重试", "error");
@@ -2024,7 +2292,7 @@
         if (!isEnabled) return;
         const candidates = [];
         for (const mutation of mutations) {
-          if (mutation.type === "characterData" || mutation.type === "attributes") {
+          if (mutation.type === "characterData" || mutation.type === "attributes" || mutation.type === "childList" && mutation.removedNodes.length > 0) {
             candidates.push(mutation.target);
           }
           for (const node of mutation.addedNodes) candidates.push(node);
