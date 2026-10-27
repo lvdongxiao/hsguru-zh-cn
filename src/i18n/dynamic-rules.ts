@@ -60,6 +60,32 @@ export function translateDynamicText(
     return `已选 ${match[1]} 张，最多 ${match[2]} 张`;
   }
 
+  if ((match = content.match(/^Choose from (\d+) deck archetypes?$/))) {
+    return `从 ${match[1]} 种套牌类型中选择`;
+  }
+  if ((match = content.match(/^Go to (.+)$/))) {
+    const deckName = translateDeckName(match[1]);
+    if (deckName !== match[1]) return `查看${deckName}`;
+  }
+  if (
+    (match = content.match(
+      /^(.+?) versus (.+?) - (\d+(?:\.\d+)?%) ([\d,]+) games?$/,
+    ))
+  ) {
+    const deckName = translateDeckName(match[1]);
+    const opponent = translateDeckName(match[2]);
+    if (deckName !== match[1] || opponent !== match[2]) {
+      return `${deckName} 对阵 ${opponent}：胜率 ${match[3]}，${match[4]} 局`;
+    }
+  }
+  if (
+    (match = content.match(/^(.+?) - ([\d,]+) games?$/)) &&
+    !match[1].includes(' versus ')
+  ) {
+    const deckName = translateDeckName(match[1]);
+    if (deckName !== match[1]) return `${deckName}：${match[2]} 局`;
+  }
+
   if ((match = content.match(/^Show ([\d,]+)$/))) {
     return `显示 ${match[1]} 条`;
   }

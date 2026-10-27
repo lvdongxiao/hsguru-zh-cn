@@ -30,6 +30,7 @@ export interface CardLocalization {
 const cacheKey = 'hsguru-zh-cn:card-dictionary';
 const cacheLifetime = 7 * 24 * 60 * 60 * 1000;
 const dataBaseUrl = 'https://api.hearthstonejson.com/v1/latest';
+let pendingNetworkLoad: Promise<CardLocalization> | undefined;
 
 function requestJson<T>(url: string): Promise<T> {
   return new Promise((resolve, reject) => {
@@ -165,6 +166,22 @@ export function buildCardFlavorsByDbfId(
   );
 }
 
+function isStringEntries(value: unknown): value is Array<[string, string]> {
+  if (!Array.isArray(value)) return false;
+  // for...of 也检查稀疏数组中的空位，避免 Object.fromEntries 随后抛错。
+  for (const entry of value) {
+    if (
+      !Array.isArray(entry) ||
+      entry.length !== 2 ||
+      typeof entry[0] !== 'string' ||
+      typeof entry[1] !== 'string'
+    ) {
+      return false;
+    }
+  }
+  return true;
+}
+
 function isValidCache(value: unknown): value is CardDictionaryCache {
   if (!value || typeof value !== 'object') return false;
   const cache = value as Partial<CardDictionaryCache>;
@@ -176,42 +193,75 @@ function isValidCache(value: unknown): value is CardDictionaryCache {
       cache.schemaVersion === 5 ||
       cache.schemaVersion === 6) &&
     typeof cache.updatedAt === 'number' &&
-    Array.isArray(cache.entries)
+    Number.isFinite(cache.updatedAt) &&
+    cache.updatedAt >= 0 &&
+    isStringEntries(cache.entries) &&
+    [
+      cache.renderIdsByDbfId,
+      cache.namesByDbfId,
+      cache.textsByDbfId,
+      cache.flavorsByDbfId,
+      cache.keywordEntries,
+    ].every((entries) => entries === undefined || isStringEntries(entries))
   );
+}
+
+function readCardCache(): CardDictionaryCache | undefined {
+  try {
+    const cached = GM_getValue<unknown>(cacheKey);
+    return isValidCache(cached) ? cached : undefined;
+  } catch {
+    // 存储不可读时仍可下载数据，不让缓存阻断翻译。
+    return undefined;
+  }
+}
+
+function localizationFromCache(
+  cache: CardDictionaryCache,
+  source: 'cache' | 'stale-cache',
+): CardLocalization {
+  return {
+    dictionary: Object.fromEntries(cache.entries),
+    renderIdsByDbfId: Object.fromEntries(cache.renderIdsByDbfId ?? []),
+    namesByDbfId: Object.fromEntries(cache.namesByDbfId ?? []),
+    textsByDbfId: Object.fromEntries(cache.textsByDbfId ?? []),
+    flavorsByDbfId: Object.fromEntries(cache.flavorsByDbfId ?? []),
+    keywordDictionary: Object.fromEntries(cache.keywordEntries ?? []),
+    source,
+  };
 }
 
 export async function loadCardLocalization(
   forceRefresh = false,
 ): Promise<CardLocalization> {
-  const cached = GM_getValue<unknown>(cacheKey);
-  const validCache = isValidCache(cached) ? cached : undefined;
-  const cachedRenderIds = validCache?.renderIdsByDbfId;
-  const cachedNames = validCache?.namesByDbfId;
-  const cachedTexts = validCache?.textsByDbfId;
-  const cachedFlavors = validCache?.flavorsByDbfId;
-  const cachedKeywords = validCache?.keywordEntries;
+  // 自动加载与手动更新共享真正进行中的网络任务，避免旧结果覆盖新资源。
+  if (pendingNetworkLoad) return pendingNetworkLoad;
+  const validCache = readCardCache();
+  const cacheAge = validCache ? Date.now() - validCache.updatedAt : Infinity;
 
   if (
     !forceRefresh &&
     validCache &&
-    Array.isArray(cachedRenderIds) &&
-    Array.isArray(cachedNames) &&
-    Array.isArray(cachedTexts) &&
-    Array.isArray(cachedFlavors) &&
-    Array.isArray(cachedKeywords) &&
-    Date.now() - validCache.updatedAt < cacheLifetime
+    validCache.renderIdsByDbfId !== undefined &&
+    validCache.namesByDbfId !== undefined &&
+    validCache.textsByDbfId !== undefined &&
+    validCache.flavorsByDbfId !== undefined &&
+    validCache.keywordEntries !== undefined &&
+    cacheAge >= 0 &&
+    cacheAge < cacheLifetime
   ) {
-    return {
-      dictionary: Object.fromEntries(validCache.entries),
-      renderIdsByDbfId: Object.fromEntries(cachedRenderIds),
-      namesByDbfId: Object.fromEntries(cachedNames),
-      textsByDbfId: Object.fromEntries(cachedTexts),
-      flavorsByDbfId: Object.fromEntries(cachedFlavors),
-      keywordDictionary: Object.fromEntries(cachedKeywords),
-      source: 'cache',
-    };
+    return localizationFromCache(validCache, 'cache');
   }
 
+  pendingNetworkLoad = fetchCardLocalization(validCache).finally(() => {
+    pendingNetworkLoad = undefined;
+  });
+  return pendingNetworkLoad;
+}
+
+async function fetchCardLocalization(
+  validCache: CardDictionaryCache | undefined,
+): Promise<CardLocalization> {
   try {
     const [englishCards, chineseCards] = await Promise.all([
       requestJson<LocalizedCard[]>(
@@ -228,7 +278,7 @@ export async function loadCardLocalization(
     const namesByDbfId = buildCardNamesByDbfId(chineseCards);
     const textsByDbfId = buildCardTextsByDbfId(chineseCards);
     const flavorsByDbfId = buildCardFlavorsByDbfId(chineseCards);
-    GM_setValue<CardDictionaryCache>(cacheKey, {
+    const nextCache: CardDictionaryCache = {
       schemaVersion: 6,
       updatedAt: Date.now(),
       entries: Object.entries(dictionary),
@@ -237,7 +287,13 @@ export async function loadCardLocalization(
       textsByDbfId: Object.entries(textsByDbfId),
       flavorsByDbfId: Object.entries(flavorsByDbfId),
       keywordEntries: Object.entries(keywordDictionary),
-    });
+    };
+    try {
+      GM_setValue(cacheKey, nextCache);
+    } catch (error) {
+      // 写入失败不应丢弃已经下载成功的数据。
+      console.warn('[HSGuru 中文助手] 卡牌翻译数据缓存写入失败。', error);
+    }
     return {
       dictionary,
       renderIdsByDbfId,
@@ -249,15 +305,7 @@ export async function loadCardLocalization(
     };
   } catch (error) {
     if (validCache) {
-      return {
-        dictionary: Object.fromEntries(validCache.entries),
-        renderIdsByDbfId: Object.fromEntries(cachedRenderIds ?? []),
-        namesByDbfId: Object.fromEntries(cachedNames ?? []),
-        textsByDbfId: Object.fromEntries(cachedTexts ?? []),
-        flavorsByDbfId: Object.fromEntries(cachedFlavors ?? []),
-        keywordDictionary: Object.fromEntries(cachedKeywords ?? []),
-        source: 'stale-cache',
-      };
+      return localizationFromCache(validCache, 'stale-cache');
     }
     throw error;
   }

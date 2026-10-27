@@ -203,6 +203,112 @@ test('decorates matchup row and column headers', (t) => {
   assert.equal(document.querySelector('td')!.textContent, '蛋DK');
 });
 
+test('translates nested matchup buttons and tooltip attributes across standard and wild updates', (t) => {
+  const { document, translator } = setupDOM(
+    t,
+    `<main><table><thead><tr><th><button phx-value-sort_by="opponent_Aggro Warlock"><span>Aggro Warlock</span></button></th></tr></thead>
+    <tbody><tr>
+      <td data-balloon-pos="right" aria-label="Aggro Warlock - 581917 games"><span>57.9</span></td>
+      <td class="sticky-column"><button aria-label="favorite" phx-value-archetype="Aggro Warlock"></button><span><button phx-click="choose_deck_archetype" phx-value-archetype="Aggro Warlock" title="Choose from 5 deck archetypes"><span>Aggro Warlock</span><span><svg></svg></span></button></span></td>
+      <td data-balloon-pos="up" aria-label="Aggro Warlock versus C'Thun DH - 54.4% 67947 games"><span>54.4</span></td>
+      <td class="sticky-column"><a href="/archetype/Quest%20Priest" title="Go to Quest Priest"><span>Quest Priest</span></a></td>
+    </tr></tbody></table><p>Aggro Warlock</p><button phx-value-archetype="Aggro Warlock"><span>Aggro Warlock</span></button></main>`,
+    '/matchups',
+  );
+  const root = document.querySelector('main')!;
+  const originalMarkup = root.innerHTML;
+  translator.translate(root);
+  const button = root.querySelector(
+    'button[phx-click="choose_deck_archetype"]',
+  )!;
+  assert.equal(button.textContent, '快攻术');
+  assert.equal(button.getAttribute('title'), '从 5 种套牌类型中选择');
+  assert.equal(button.getAttribute('phx-value-archetype'), 'Aggro Warlock');
+  assert.equal(root.querySelector('th button')!.textContent, '快攻术');
+  assert.equal(
+    root.querySelectorAll('td')[0].getAttribute('aria-label'),
+    '快攻术：581917 局',
+  );
+  assert.equal(root.querySelectorAll('td')[0].textContent, '57.9');
+  assert.equal(
+    root.querySelectorAll('td')[2].getAttribute('aria-label'),
+    '快攻术 对阵 克苏恩瞎：胜率 54.4%，67947 局',
+  );
+  assert.equal(root.querySelector('a')!.getAttribute('title'), '查看任务牧');
+  assert.equal(root.querySelector('p')!.textContent, 'Aggro Warlock');
+  assert.equal(
+    root.querySelector(':scope > button')!.textContent,
+    'Aggro Warlock',
+  );
+  const translatedMarkup = root.innerHTML;
+  translator.translate(root);
+  assert.equal(root.innerHTML, translatedMarkup);
+  translator.restore(root);
+  assert.equal(root.innerHTML, originalMarkup);
+
+  // 模式切换后站点异步替换表体；新节点应翻译，站点事件参数保持原文。
+  const body = root.querySelector('tbody')!;
+  body.innerHTML = `<tr><td class="sticky-column"><span><button phx-click="choose_deck_archetype" phx-value-archetype="Highlander Druid" title="Choose from 4 deck archetypes"><span>Highlander Druid</span></button></span></td>
+    <td class="sticky-column"><span><button phx-click="choose_deck_archetype" phx-value-archetype="Mill Druid"><span>Mill Druid</span></button></span></td>
+    <td class="sticky-column"><span><button phx-click="choose_deck_archetype" phx-value-archetype="Linecracker Druid"><span>Linecracker Druid</span></button></span></td>
+    <td class="sticky-column"><span>BFU Handbuff DK</span></td>
+    <td aria-label="Highlander Druid versus Mill Druid - 0% 0 games">0</td></tr>`;
+  const wildMarkup = body.innerHTML;
+  translator.translate(body);
+  assert.deepEqual(
+    [...body.querySelectorAll('button')].map((el) => el.textContent),
+    ['宇宙德', '爆牌德', '阵线破坏者德'],
+  );
+  assert.equal(
+    body.querySelector('button')!.getAttribute('phx-value-archetype'),
+    'Highlander Druid',
+  );
+  assert.equal(
+    body.querySelector('button')!.getAttribute('title'),
+    '从 4 种套牌类型中选择',
+  );
+  assert.equal(
+    body.querySelector('td[aria-label]')!.getAttribute('aria-label'),
+    '宇宙德 对阵 爆牌德：胜率 0%，0 局',
+  );
+  assert.equal(body.querySelectorAll(runeIconSelector).length, 1);
+  translator.restore(body);
+  assert.equal(body.innerHTML, wildMarkup);
+});
+
+test('translates the matchup archetype chooser without replacing its name span or links', (t) => {
+  const { document, translator } = setupDOM(
+    t,
+    `<main><div id="deck_archetype_modal" role="dialog" aria-label="Choose Deck Archetype"><header><p>Choose Deck Archetype</p><button aria-label="Close modal"></button></header>
+    <section class="modal-card-body"><p><span>Highlander Druid</span> contains multiple deck archetypes. Select which one you want to view:</p>
+    <a href="/archetype/Highlander%20Druid"><span>Highlander Druid</span></a>
+    <a href="/archetype/XL%20Highlander%20Druid"><span>XL Highlander Druid</span></a></section><footer><button>Cancel</button></footer></div></main>`,
+    '/matchups',
+  );
+  const modal = document.querySelector('[role="dialog"]')!;
+  const originalMarkup = modal.outerHTML;
+  const name = modal.querySelector('.modal-card-body p span');
+  translator.translate(modal);
+  assert.equal(modal.getAttribute('aria-label'), '选择套牌类型');
+  assert.equal(modal.querySelector('header p')!.textContent, '选择套牌类型');
+  assert.equal(
+    modal.querySelector('header button')!.getAttribute('aria-label'),
+    '关闭窗口',
+  );
+  assert.equal(
+    modal.querySelector('.modal-card-body p')!.textContent,
+    '宇宙德 包含多个套牌类型，请选择要查看的类型：',
+  );
+  assert.strictEqual(modal.querySelector('.modal-card-body p span'), name);
+  assert.equal(
+    modal.querySelector('a')!.getAttribute('href'),
+    '/archetype/Highlander%20Druid',
+  );
+  assert.equal(modal.querySelector('footer button')!.textContent, '取消');
+  translator.restore(modal);
+  assert.equal(modal.outerHTML, originalMarkup);
+});
+
 test('handles new, changed, removed and site-replaced rune titles', (t) => {
   const { document, translator } = setupDOM(
     t,

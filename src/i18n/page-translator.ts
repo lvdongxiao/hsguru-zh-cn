@@ -59,8 +59,11 @@ function isDeckNameNode(node: Text): boolean {
     return true;
   }
   if (/^\/matchups\/?$/.test(window.location.pathname)) {
-    if (element.matches('table td.sticky-column')) return true;
-    if (element.matches('table th button[phx-value-sort_by^="opponent_"]')) {
+    if (element.closest('table td.sticky-column')) return true;
+    if (element.closest('table th button[phx-value-sort_by^="opponent_"]')) {
+      return true;
+    }
+    if (element.matches('#deck_archetype_modal .modal-card-body > p > span')) {
       return true;
     }
   }

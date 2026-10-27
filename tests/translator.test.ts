@@ -578,10 +578,53 @@ test('translates matchup matrix controls and explanations', () => {
     'Reset Weights': '重置权重',
     'Popularity:': '热度：',
     favorite: '收藏',
+    'Choose Deck Archetype': '选择套牌类型',
+    'contains multiple deck archetypes. Select which one you want to view:':
+      '包含多个套牌类型，请选择要查看的类型：',
+    'Close modal': '关闭窗口',
+    Cancel: '取消',
   };
 
   for (const [english, chinese] of Object.entries(expected)) {
     assert.equal(translateText(english, siteDictionary), chinese);
+  }
+});
+
+test('translates complete matchup tooltip templates with deck names and unchanged statistics', () => {
+  const expected: Readonly<Record<string, string>> = {
+    'Choose from 5 deck archetypes': '从 5 种套牌类型中选择',
+    'Choose from 1 deck archetype': '从 1 种套牌类型中选择',
+    "Go to C'Thun DH": '查看克苏恩瞎',
+    'Go to Highlander Druid': '查看宇宙德',
+    'Aggro Warlock - 581917 games': '快攻术：581917 局',
+    'XL HL Thief Priest - 1,000 games': 'XL宇宙脏牧：1,000 局',
+    "Aggro Warlock versus C'Thun DH - 54.4% 67947 games":
+      '快攻术 对阵 克苏恩瞎：胜率 54.4%，67947 局',
+    'Highlander Druid versus Mill Druid - 0% 0 games':
+      '宇宙德 对阵 爆牌德：胜率 0%，0 局',
+    'XL HL Thief Priest versus Quasar Rogue - 100.0% 1 game':
+      'XL宇宙脏牧 对阵 类星体贼：胜率 100.0%，1 局',
+  };
+  for (const [source, translated] of Object.entries(expected)) {
+    assert.equal(translateText(source, siteDictionary), translated);
+    assert.equal(
+      translateText(` \n${source}\t `, siteDictionary),
+      ` \n${translated}\t `,
+    );
+  }
+  for (const source of [
+    'Go to Settings',
+    'Please Go to Highlander Druid',
+    'Choose from 5 cards',
+    'Choose from 5 deck archetypes today',
+    'Aggro Warlock - many games',
+    'Aggro Warlock - 2 games today',
+    'CPU versus GPU - 50% 2 games',
+    'Aggro Warlock versus Mill Druid - 50% 2 games today',
+    'Aggro Warlock versus Mill Druid - unknown 2 games',
+    'Aggro Warlock versus Mill Druid - 50% 2 viewers',
+  ]) {
+    assert.equal(translateText(source, siteDictionary), source);
   }
 });
 

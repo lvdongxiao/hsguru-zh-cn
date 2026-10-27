@@ -8,7 +8,10 @@ import {
   installDeckClipboardTranslation,
   installDeckCopyButtonTranslation,
 } from './clipboard';
-import { loadCardLocalization } from './data/card-dictionary';
+import {
+  loadCardLocalization,
+  type CardLocalization,
+} from './data/card-dictionary';
 import { dictionary } from './i18n/dictionary';
 import { createTranslationResources } from './i18n/resources';
 import { PageTranslator } from './i18n/translator';
@@ -21,7 +24,7 @@ export function installHsguruZhCn(): void {
   let translationResources = createTranslationResources(dictionary);
   const translator = new PageTranslator(translationResources);
   let cardRenderIdsByDbfId: Readonly<Record<string, string>> = {};
-  let hasLoadedCardLocalization = false;
+  let appliedCardLocalization: CardLocalization | undefined;
   let isEnabled = localStorage.getItem(storageKey) !== 'false';
   const originalDocumentLanguage = document.documentElement?.lang || 'en';
 
@@ -142,20 +145,26 @@ export function installHsguruZhCn(): void {
 
     try {
       const cardLocalization = await loadCardLocalization(forceRefresh);
-      // 首次加载前页面只使用界面词典，无需多做一次整页恢复。
-      // 后续刷新则先恢复旧资源生成的内容，避免残留旧译文和旧卡图。
-      if (hasLoadedCardLocalization && isEnabled && document.documentElement) {
-        translator.restore(document.documentElement);
-        restoreCardImages(document.documentElement);
+      // 同一网络任务可能被启动加载和菜单更新共同等待，只应用一次结果。
+      if (appliedCardLocalization !== cardLocalization) {
+        // 首次加载前页面只使用界面词典，无需多做一次整页恢复。
+        // 后续刷新则先恢复旧资源生成的内容，避免残留旧译文和旧卡图。
+        if (appliedCardLocalization && isEnabled && document.documentElement) {
+          translator.restore(document.documentElement);
+          restoreCardImages(document.documentElement);
+        }
+        translationResources = createTranslationResources(
+          dictionary,
+          cardLocalization,
+        );
+        translator.replaceResources(translationResources);
+        cardRenderIdsByDbfId = cardLocalization.renderIdsByDbfId;
+        appliedCardLocalization = cardLocalization;
+        translatePage();
+        console.info(
+          `[HSGuru 中文助手] 已加载 ${Object.keys(cardLocalization.dictionary).length} 条卡牌翻译。`,
+        );
       }
-      translationResources = createTranslationResources(
-        dictionary,
-        cardLocalization,
-      );
-      translator.replaceResources(translationResources);
-      cardRenderIdsByDbfId = cardLocalization.renderIdsByDbfId;
-      hasLoadedCardLocalization = true;
-      translatePage();
 
       if (forceRefresh) {
         if (cardLocalization.source === 'network') {
@@ -168,9 +177,6 @@ export function installHsguruZhCn(): void {
           showCardUpdateNotice('更新失败，已继续使用原有缓存', 'error');
         }
       }
-      console.info(
-        `[HSGuru 中文助手] 已加载 ${Object.keys(cardLocalization.dictionary).length} 条卡牌翻译。`,
-      );
     } catch (error) {
       if (forceRefresh) {
         showCardUpdateNotice('卡牌翻译数据更新失败，请稍后重试', 'error');

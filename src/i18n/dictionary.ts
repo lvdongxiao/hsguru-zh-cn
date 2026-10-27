@@ -64,6 +64,11 @@ export const dictionary: Readonly<Record<string, string>> = {
   No: '否',
   All: '全部',
   'Select All': '全选',
+  'Choose Deck Archetype': '选择套牌类型',
+  'contains multiple deck archetypes. Select which one you want to view:':
+    '包含多个套牌类型，请选择要查看的类型：',
+  'Close modal': '关闭窗口',
+  Cancel: '取消',
   Any: '任意',
   Latest: '最新',
   Default: '默认',
